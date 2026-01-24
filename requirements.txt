@@ -3,3 +3,6 @@ gunicorn
 whitenoise
 requests
 markdown
+Pygments
+tiktoken
+openai

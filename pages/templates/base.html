@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ARENA{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pygments.css' %}">
+    <!-- KaTeX for LaTeX rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <img src="{% static 'images/arena-logo.png' %}" alt="ARENA" class="nav-logo-img">
+            </a>
+
+            <div class="nav-links">
+                <a href="/" class="nav-link">Content</a>
+                <a href="/faq/" class="nav-link">FAQ</a>
+            </div>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Right sidebar toggle button -->
+    <button class="right-sidebar-toggle" id="right-sidebar-toggle" aria-label="Toggle right sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+    </button>
+
+    <!-- Right sidebar with download and chat -->
+    <aside class="right-sidebar" id="right-sidebar">
+        <div class="right-sidebar-resize-handle" id="right-sidebar-resize-handle"></div>
+
+        <!-- Select Context Section -->
+        <div class="right-sidebar-section download-section" id="download-section">
+            <div class="right-sidebar-header">
+                <span class="right-sidebar-title">Select Context</span>
+                <button class="help-button" id="download-help-btn" aria-label="Help">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </button>
+                <div class="help-tooltip" id="download-help-tooltip">
+                    Select exercise content to download as text files, or to provide as context when asking questions below.
+                </div>
+            </div>
+
+            <div class="download-options" id="download-options">
+                <!-- Section selection (populated by JS) -->
+                <div class="download-option-group download-sections" id="download-sections">
+                    <div class="download-section-header">Sections</div>
+                    <!-- Checkboxes for each section will be inserted here by JavaScript -->
+                </div>
+
+                <!-- Format options -->
+                <div class="download-option-group">
+                    <div class="download-section-header">File type</div>
+                    <label class="download-option">
+                        <input type="radio" name="download-format" value="python" checked>
+                        <span>Python</span>
+                        <button class="help-button inline-help" data-tooltip="Download the solutions Python file containing all code.">?</button>
+                    </label>
+                    <label class="download-option">
+                        <input type="radio" name="download-format" value="markdown">
+                        <span>Markdown (full)</span>
+                        <button class="help-button inline-help" data-tooltip="Download the full markdown with code and explanations.">?</button>
+                    </label>
+                    <label class="download-option">
+                        <input type="radio" name="download-format" value="markdown_no_solutions">
+                        <span>Markdown (without solutions)</span>
+                        <button class="help-button inline-help" data-tooltip="Download the markdown with solution blocks removed.">?</button>
+                    </label>
+                </div>
+
+                <button class="download-button" id="download-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span class="download-btn-text">Download</span>
+                    <span class="download-btn-tokens" id="download-btn-tokens"></span>
+                </button>
+            </div>
+
+            <!-- Disabled overlay for non-chapter pages -->
+            <div class="download-disabled-overlay" id="download-disabled-overlay">
+                <div class="disabled-message">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span>Visit a chapter section to download content</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="right-sidebar-section chat-section">
+            <div class="right-sidebar-header">
+                <span class="right-sidebar-title">Ask a Question</span>
+                <button class="help-button" id="chat-help-btn" aria-label="Help">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </button>
+                <div class="help-tooltip" id="chat-help-tooltip">
+                    Ask questions about the exercises. The model will use the context you've selected above to provide relevant answers.
+                </div>
+            </div>
+
+            <div class="chat-model-select">
+                <label for="chat-model">Model:</label>
+                <select id="chat-model" name="chat-model">
+                    <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
+                    <option value="gpt-4o-mini">gpt-4o-mini</option>
+                </select>
+            </div>
+
+            <div class="chat-input-container">
+                <textarea
+                    class="chat-input"
+                    id="chat-input"
+                    placeholder="Type your question..."
+                    rows="1"
+                ></textarea>
+                <button class="chat-send-btn" id="chat-send-btn" aria-label="Send message">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-placeholder">Ask questions about the exercises...</div>
+            </div>
+
+            <button class="chat-clear-btn" id="chat-clear-btn">
+                Clear chat history
+            </button>
+        </div>
+    </aside>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <p>ARENA - Alignment Research Engineer Accelerator</p>
+        </div>
+    </footer>
+
+    <!-- KaTeX for LaTeX rendering -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <script>
+        // KaTeX configuration
+        var katexOptions = {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ],
+            throwOnError: false
+        };
+        // Render math when auto-render is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, katexOptions);
+            }
+        });
+        // Also try after a short delay in case scripts load later
+        window.addEventListener('load', function() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, katexOptions);
+            }
+        });
+        // Global function to re-render math after dynamic content loads
+        window.renderMath = function(el) {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(el || document.body, katexOptions);
+            }
+        };
+    </script>
+    <script src="{% static 'js/theme.js' %}"></script>
+    <script src="{% static 'js/right-sidebar.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
