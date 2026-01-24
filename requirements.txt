@@ -1,0 +1,5 @@
+Django>=5.0
+gunicorn
+whitenoise
+requests
+markdown
