@@ -383,8 +383,10 @@ def setup(request):
 
 @require_GET
 def map_view(request):
-    """Map page."""
+    """Map page - dependency map of course sections."""
     context = _get_context_base()
+    # Pass chapters as JSON for JavaScript to render the map
+    context["chapters_json"] = json.dumps(context["chapters"])
     return render(request, "map.html", context)
 
 

@@ -87,6 +87,28 @@
 
     <!-- Main content area -->
     <div class="chapter-content">
+        <!-- Breadcrumb navigation -->
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="/" class="breadcrumb-link">Content</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/{{ chapter.id }}/" class="breadcrumb-link">{{ chapter.short_title }}</a>
+                </li>
+                {% if current_section and section %}
+                <li class="breadcrumb-item">
+                    <a href="/{{ chapter.id }}/{{ current_section }}/" class="breadcrumb-link">{{ section.number }} {{ section.title }}</a>
+                </li>
+                {% endif %}
+                {% if current_subsection and current_subsection_data and current_subsection != 'intro' %}
+                <li class="breadcrumb-item breadcrumb-current">
+                    <span>{{ current_subsection_data.title }}</span>
+                </li>
+                {% endif %}
+            </ol>
+        </nav>
+
         <div id="content-area">
             {% if current_subsection_data %}
             <article class="markdown-content">

@@ -219,6 +219,29 @@
     </script>
     <script src="{% static 'js/theme.js' %}"></script>
     <script src="{% static 'js/right-sidebar.js' %}"></script>
+    <script>
+        // Highlight active nav link
+        (function() {
+            const path = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                // Exact match for home, or starts with for other pages
+                if (href === '/' && (path === '/' || path.startsWith('/chapter'))) {
+                    if (path === '/' || path.startsWith('/chapter')) {
+                        link.classList.add('active');
+                    }
+                } else if (href !== '/' && path.startsWith(href)) {
+                    link.classList.add('active');
+                }
+            });
+            // Remove active from Content if we're on a specific non-chapter page
+            if (path.startsWith('/map') || path.startsWith('/setup') || path.startsWith('/faq')) {
+                const contentLink = document.querySelector('.nav-link[href="/"]');
+                if (contentLink) contentLink.classList.remove('active');
+            }
+        })();
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -1,13 +1,789 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Map - ARENA{% endblock %}
 
+{% block extra_css %}
+<style>
+    .map-container {
+        padding: 2rem;
+        max-width: 100%;
+        overflow-x: auto;
+        position: relative;
+    }
+
+    .map-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--color-text);
+    }
+
+    .map-subtitle {
+        color: var(--color-text-secondary);
+        margin-bottom: 2rem;
+    }
+
+    .map-legend {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: var(--color-bg-secondary);
+        border-radius: 8px;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--color-text-secondary);
+    }
+
+    .legend-line {
+        width: 30px;
+        height: 2px;
+    }
+
+    .legend-line.solid {
+        background: #666;
+    }
+
+    .legend-line.dashed {
+        background: repeating-linear-gradient(
+            to right,
+            #666 0,
+            #666 5px,
+            transparent 5px,
+            transparent 10px
+        );
+    }
+
+    .map-wrapper {
+        position: relative;
+    }
+
+    /* SVG overlay for dependency arrows */
+    .dependency-svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .swim-lanes {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        position: relative;
+    }
+
+    .swim-lane {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: var(--color-bg-secondary);
+        border-radius: 12px;
+        position: relative;
+    }
+
+    .lane-header {
+        min-width: 160px;
+        padding-right: 1.5rem;
+        border-right: 2px solid var(--color-border);
+    }
+
+    .lane-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--color-text);
+        margin-bottom: 0.25rem;
+    }
+
+    .lane-subtitle {
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+    }
+
+    .lane-sections {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        flex: 1;
+        align-items: flex-start;
+    }
+
+    /* Card styles - consistent sizes */
+    .section-card-wrapper {
+        position: relative;
+        width: 174px;
+        height: 170px;
+    }
+
+    .section-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .section-card-front,
+    .section-card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: opacity 0.2s ease;
+    }
+
+    /* Simple show/hide instead of 3D flip */
+    .section-card-front {
+        opacity: 1;
+    }
+
+    .section-card-back {
+        opacity: 0;
+    }
+
+    .section-card-wrapper.flipped .section-card-front {
+        opacity: 0;
+    }
+
+    .section-card-wrapper.flipped .section-card-back {
+        opacity: 1;
+    }
+
+    .section-card-front {
+        background: var(--color-bg);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .section-card-image {
+        width: 100%;
+        height: 90px;
+        object-fit: cover;
+        background: var(--color-bg-tertiary);
+    }
+
+    .section-card-info {
+        padding: 0.5rem 0.75rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .section-card-number {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--chapter-color, var(--color-primary));
+        margin-bottom: 0.25rem;
+    }
+
+    .section-card-title {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--color-text);
+        line-height: 1.3;
+        overflow: hidden;
+        display: -webkit-box;
+        line-clamp: 3;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+
+    .section-card-back {
+        background: var(--color-bg);
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        border: 2px solid var(--chapter-color, var(--color-border));
+    }
+
+    .section-card-back-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--chapter-color, var(--color-primary));
+        margin-bottom: 0.35rem;
+    }
+
+    .section-card-description {
+        font-size: 0.7rem;
+        color: var(--color-text-secondary);
+        line-height: 1.4;
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .section-card-link {
+        text-decoration: none;
+        margin-top: auto;
+        padding-top: 0.6rem;
+        font-size: 0.75rem;
+        color: var(--chapter-color, var(--color-primary));
+        font-weight: 500;
+        scroll-margin: 0;
+    }
+
+    .section-card-link:hover {
+        text-decoration: underline;
+    }
+
+    .section-card-link:focus {
+        outline: none;
+        scroll-margin: 0;
+    }
+
+    /* Footnotes for soft dependencies */
+    .map-footnotes {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: var(--color-bg-secondary);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        color: var(--color-text-secondary);
+    }
+
+    .map-footnote {
+        margin-bottom: 0.5rem;
+    }
+
+    .map-footnote:last-child {
+        margin-bottom: 0;
+    }
+
+    .footnote-marker {
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    /* Group indicator for subsections */
+    .section-group-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: var(--color-bg-tertiary);
+        border-radius: 10px;
+        border: 1px dashed var(--color-border);
+    }
+
+    .section-group-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--color-text-secondary);
+        padding: 0 0.25rem;
+    }
+
+    .section-group-items {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    /* Arrow styles */
+    .dependency-path {
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .dependency-path.required {
+        stroke: #666;
+    }
+
+    .dependency-path.soft {
+        stroke: #999;
+        stroke-dasharray: 6, 4;
+    }
+
+    /* Card footnote markers - inline after title */
+    .card-footnote {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--color-primary);
+        vertical-align: super;
+    }
+
+    /* Hover-to-reveal dependency highlighting */
+    .section-card-wrapper.dimmed,
+    .section-group-wrapper.dimmed {
+        opacity: 0.25;
+    }
+
+    .section-card-wrapper.highlighted,
+    .section-group-wrapper.highlighted {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="static-page-container">
-    <div class="static-page-content">
-        <h1>Map</h1>
-        <hr>
-        <p>Map content coming soon.</p>
+<div class="map-container">
+    <h1 class="map-title">Course Map</h1>
+    <p class="map-subtitle">Explore the ARENA curriculum structure. You can also access it from the "Content" tab on the top navigation bar, but this provides a more visual overview (including dependencies between sections).</p>
+    <p class="map-subtitle" style="margin-top: -1rem;">Hover over a section to see its prerequisites highlighted with dependency arrows. Note: "required prerequisites" generally mean the section covers essential groundwork you need to understand the next exercises &mdash; if you're already familiar with a topic, you can skip the corresponding exercises. "Soft dependencies" indicate helpful but not required prerequisites &mdash; the material will be more accessible if you've completed them, but you can proceed without.</p>
+
+    <div class="map-legend">
+        <div class="legend-item">
+            <div class="legend-line solid"></div>
+            <span>Required prerequisite</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-line dashed"></div>
+            <span>Soft dependency</span>
+        </div>
+    </div>
+
+    <div class="map-wrapper">
+        <!-- SVG for arrows - will be populated by JavaScript -->
+        <svg class="dependency-svg" id="dependency-svg">
+            <defs>
+                <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#666" />
+                </marker>
+                <marker id="arrowhead-soft" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#999" />
+                </marker>
+            </defs>
+        </svg>
+
+        <div class="swim-lanes" id="swim-lanes">
+            {% for chapter in chapters %}
+            <div class="swim-lane" style="--chapter-color: {{ chapter.color }}" data-chapter-id="{{ chapter.id }}">
+                <div class="lane-header">
+                    <div class="lane-title">{{ chapter.short_title }}</div>
+                    <div class="lane-subtitle">Chapter {{ forloop.counter0 }}</div>
+                </div>
+                <div class="lane-sections">
+                    {% for section in chapter.sections %}
+                    {% if not section.is_group and not section.parent and not section.is_special %}
+                    <div class="section-card-wrapper"
+                         data-section-id="{{ section.id }}"
+                         data-section-number="{{ section.number }}"
+                         id="card-{{ section.number }}">
+                        <div class="section-card-inner">
+                            <div class="section-card-front">
+                                {% if section.header_image %}
+                                <img src="{{ section.header_image }}" alt="{{ section.title }}" class="section-card-image" loading="lazy">
+                                {% else %}
+                                <div class="section-card-image"></div>
+                                {% endif %}
+                                <div class="section-card-info">
+                                    <div class="section-card-number">{{ section.number }}</div>
+                                    <div class="section-card-title">{{ section.title }}{% if section.number == "1.2" %}<span class="card-footnote">†</span>{% endif %}{% if section.number == "0.3" or section.number == "0.4" %}<span class="card-footnote">‡</span>{% endif %}</div>
+                                </div>
+                            </div>
+                            <div class="section-card-back">
+                                <div class="section-card-back-title">{{ section.number }} {{ section.title }}</div>
+                                <div class="section-card-description">{{ section.streamlit_description_short }}</div>
+                                <a href="/{{ chapter.id }}/{{ section.id }}/" class="section-card-link">View section &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% elif section.is_group %}
+                    <!-- Group with children -->
+                    <div class="section-group-wrapper" data-group-id="{{ section.id }}" data-group-number="{{ section.number }}">
+                        <div class="section-group-title">{{ section.number }} {{ section.title }}</div>
+                        <div class="section-group-items">
+                            {% for child_section in chapter.sections %}
+                            {% if child_section.parent == section.id %}
+                            <div class="section-card-wrapper"
+                                 data-section-id="{{ child_section.id }}"
+                                 data-section-number="{{ child_section.number }}"
+                                 id="card-{{ child_section.number }}">
+                                <div class="section-card-inner">
+                                    <div class="section-card-front">
+                                        {% if child_section.header_image %}
+                                        <img src="{{ child_section.header_image }}" alt="{{ child_section.title }}" class="section-card-image" loading="lazy">
+                                        {% else %}
+                                        <div class="section-card-image"></div>
+                                        {% endif %}
+                                        <div class="section-card-info">
+                                            <div class="section-card-number">{{ child_section.number }}</div>
+                                            <div class="section-card-title">{{ child_section.title }}{% if child_section.number == "1.5.4" %}<span class="card-footnote">§</span>{% endif %}</div>
+                                        </div>
+                                    </div>
+                                    <div class="section-card-back">
+                                        <div class="section-card-back-title">{{ child_section.number }}</div>
+                                        <div class="section-card-description">{{ child_section.streamlit_description_short }}</div>
+                                        <a href="/{{ chapter.id }}/{{ child_section.id }}/" class="section-card-link">View &rarr;</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="map-footnotes">
+        <div class="map-footnote">
+            <span class="footnote-marker">†</span> "Intro to Mech Interp" is split into 4 subsections. The first 3 are required for the rest of the chapter, but the fourth subsection is only required for the 1.5.X (Toy Models) exercises &mdash; nothing in 1.3, 1.4, or 1.6 depends on it.
+        </div>
+        <div class="map-footnote">
+            <span class="footnote-marker">‡</span> Optimization and Backpropagation are not strict dependencies for later sections, but are strongly recommended for laying the conceptual groundwork for deep learning.
+        </div>
+        <div class="map-footnote">
+            <span class="footnote-marker">§</span> "Superposition & SAEs" (1.5.4) is weakly recommended before "Indirect Object Identification" (1.3.3) and "Function Vectors" (1.4.2), but is not a strict prerequisite.
+        </div>
     </div>
 </div>
+
+<script>
+// Dependency definitions - direct dependencies only (recursive computed below)
+const dependencies = {
+    // Chapter 0: Linear sequence (0.0 -> 0.1 -> 0.2)
+    // 0.3-0.5 are optional deep dives, only depend on each other
+    "0.1": { requires: ["0.0"] },
+    "0.2": { requires: ["0.1"] },
+    "0.3": { requires: ["0.2"] },
+    "0.4": { requires: ["0.3"] },
+    "0.5": { requires: ["0.4"] },
+
+    // Chapter 1: 1.1 is hard prereq for everything in ch1
+    "1.1": { requires: ["0.2"] },
+    "1.2": { requires: ["1.1"] },
+    // Groups depend on 1.2
+    "1.3": { requires: ["1.2"] },
+    "1.4": { requires: ["1.2"] },
+    "1.5": { requires: ["1.2"] },
+    "1.6": { requires: ["1.2"] },
+    // Children inherit group deps
+    "1.3.1": { requires: ["1.2"] },
+    "1.3.2": { requires: ["1.2"] },
+    "1.3.3": { requires: ["1.2"] },
+    "1.4.1": { requires: ["1.2"] },
+    "1.4.2": { requires: ["1.2"] },
+    "1.5.1": { requires: ["1.2"] },
+    "1.5.2": { requires: ["1.2"] },
+    "1.5.3": { requires: ["1.2"] },
+    "1.5.4": { requires: ["1.2"] },
+    "1.6.1": { requires: ["1.2"] },
+    "1.6.2": { requires: ["1.2"] },
+    "1.6.3": { requires: ["1.2"] },
+    "1.6.4": { requires: ["1.2"] },
+    "1.6.5": { requires: ["1.2"] },
+
+    // Chapter 2: Linear sequence, 1.1 is hard prereq for RLHF
+    "2.1": { requires: ["0.2"] },
+    "2.2.1": { requires: ["2.1"] },
+    "2.2.2": { requires: ["2.2.1"] },
+    "2.3": { requires: ["2.2.2"] },
+    "2.4": { requires: ["2.3", "1.1"] },
+
+    // Chapter 3: Linear sequence, 1.1 is soft prereq for 3.1 only
+    "3.1": { soft: ["1.1"] },
+    "3.2": { requires: ["3.1"] },
+    "3.3": { requires: ["3.2"] },
+    "3.4": { requires: ["3.3"] },
+};
+
+// Compute all recursive prerequisites for a given section
+function getAllPrerequisites(sectionNum, visited = new Set()) {
+    if (visited.has(sectionNum)) return { required: new Set(), soft: new Set() };
+    visited.add(sectionNum);
+
+    const result = { required: new Set(), soft: new Set() };
+    const deps = dependencies[sectionNum];
+    if (!deps) return result;
+
+    // Add direct required dependencies and recurse
+    if (deps.requires) {
+        for (const req of deps.requires) {
+            result.required.add(req);
+            const subDeps = getAllPrerequisites(req, visited);
+            subDeps.required.forEach(d => result.required.add(d));
+            subDeps.soft.forEach(d => result.soft.add(d));
+        }
+    }
+
+    // Add direct soft dependencies and recurse
+    if (deps.soft) {
+        for (const soft of deps.soft) {
+            result.soft.add(soft);
+            const subDeps = getAllPrerequisites(soft, visited);
+            // Soft deps of soft deps are also soft
+            subDeps.required.forEach(d => result.soft.add(d));
+            subDeps.soft.forEach(d => result.soft.add(d));
+        }
+    }
+
+    return result;
+}
+
+// Get all section numbers that exist on the page
+function getAllSectionNumbers() {
+    const numbers = new Set();
+    document.querySelectorAll('.section-card-wrapper').forEach(el => {
+        if (el.dataset.sectionNumber) numbers.add(el.dataset.sectionNumber);
+    });
+    document.querySelectorAll('.section-group-wrapper').forEach(el => {
+        if (el.dataset.groupNumber) numbers.add(el.dataset.groupNumber);
+    });
+    return numbers;
+}
+
+function getElementCenter(el) {
+    const rect = el.getBoundingClientRect();
+    const containerRect = document.querySelector('.map-wrapper').getBoundingClientRect();
+    return {
+        x: rect.left - containerRect.left + rect.width / 2,
+        y: rect.top - containerRect.top + rect.height / 2,
+        top: rect.top - containerRect.top,
+        bottom: rect.bottom - containerRect.top,
+        left: rect.left - containerRect.left,
+        right: rect.right - containerRect.left,
+        width: rect.width,
+        height: rect.height
+    };
+}
+
+function findElement(sectionNum) {
+    // Try to find card directly
+    let el = document.getElementById('card-' + sectionNum);
+    if (el) return el;
+
+    // Try to find group wrapper for group numbers like "1.3"
+    const groups = document.querySelectorAll('.section-group-wrapper');
+    for (const group of groups) {
+        if (group.dataset.groupNumber === sectionNum) {
+            return group;
+        }
+    }
+
+    return null;
+}
+
+function createPath(fromEl, toEl, isSoft) {
+    const from = getElementCenter(fromEl);
+    const to = getElementCenter(toEl);
+
+    const dy = to.y - from.y;
+
+    let startX, startY, endX, endY;
+
+    // If elements are in the same row (similar y), draw horizontal arrow
+    if (Math.abs(dy) < 100) {
+        // Horizontal: right edge to left edge
+        startX = from.right;
+        startY = from.y;
+        endX = to.left - 5;
+        endY = to.y;
+    } else {
+        // Cross-lane: straight line from bottom center to top center
+        if (dy > 0) {
+            startX = from.x;
+            startY = from.bottom;
+            endX = to.x;
+            endY = to.top - 5;
+        } else {
+            startX = from.x;
+            startY = from.top;
+            endX = to.x;
+            endY = to.bottom + 5;
+        }
+    }
+
+    // Simple straight line
+    const d = `M ${startX} ${startY} L ${endX} ${endY}`;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'dependency-path ' + (isSoft ? 'soft' : 'required'));
+    path.setAttribute('marker-end', isSoft ? 'url(#arrowhead-soft)' : 'url(#arrowhead)');
+
+    return path;
+}
+
+function clearArrows() {
+    const svg = document.getElementById('dependency-svg');
+    const paths = svg.querySelectorAll('path');
+    paths.forEach(p => p.remove());
+}
+
+function updateSvgSize() {
+    const svg = document.getElementById('dependency-svg');
+    const wrapper = document.querySelector('.map-wrapper');
+    const wrapperRect = wrapper.getBoundingClientRect();
+    svg.setAttribute('width', wrapperRect.width);
+    svg.setAttribute('height', wrapperRect.height);
+}
+
+// Draw arrows only for a specific section's prerequisites (recursive)
+function drawArrowsForSection(sectionNum) {
+    const svg = document.getElementById('dependency-svg');
+    clearArrows();
+    updateSvgSize();
+
+    const prereqs = getAllPrerequisites(sectionNum);
+    const targetEl = findElement(sectionNum);
+    if (!targetEl) return;
+
+    // Build list of arrows to draw: from each prereq to its direct dependents
+    // that are in the path to sectionNum
+    const allHighlighted = new Set([sectionNum, ...prereqs.required, ...prereqs.soft]);
+
+    // Draw arrows between consecutive prerequisites in the dependency chain
+    for (const num of allHighlighted) {
+        const deps = dependencies[num];
+        if (!deps) continue;
+
+        const el = findElement(num);
+        if (!el) continue;
+
+        // Draw from required deps to this element
+        if (deps.requires) {
+            for (const req of deps.requires) {
+                if (allHighlighted.has(req)) {
+                    const reqEl = findElement(req);
+                    if (reqEl) {
+                        const path = createPath(reqEl, el, false);
+                        svg.appendChild(path);
+                    }
+                }
+            }
+        }
+
+        // Draw from soft deps to this element
+        if (deps.soft) {
+            for (const soft of deps.soft) {
+                if (allHighlighted.has(soft)) {
+                    const softEl = findElement(soft);
+                    if (softEl) {
+                        const path = createPath(softEl, el, true);
+                        svg.appendChild(path);
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Dim all cards except the highlighted ones
+function highlightSection(sectionNum) {
+    const prereqs = getAllPrerequisites(sectionNum);
+    const highlighted = new Set([sectionNum, ...prereqs.required, ...prereqs.soft]);
+
+    // Also highlight groups if any children are highlighted
+    const groups = document.querySelectorAll('.section-group-wrapper');
+    groups.forEach(group => {
+        const groupNum = group.dataset.groupNumber;
+        const children = group.querySelectorAll('.section-card-wrapper');
+        let hasHighlightedChild = false;
+        children.forEach(child => {
+            if (highlighted.has(child.dataset.sectionNumber)) {
+                hasHighlightedChild = true;
+            }
+        });
+        if (hasHighlightedChild || highlighted.has(groupNum)) {
+            highlighted.add(groupNum);
+        }
+    });
+
+    // Apply dimming
+    document.querySelectorAll('.section-card-wrapper').forEach(el => {
+        const num = el.dataset.sectionNumber;
+        if (highlighted.has(num)) {
+            el.classList.add('highlighted');
+            el.classList.remove('dimmed');
+        } else {
+            el.classList.add('dimmed');
+            el.classList.remove('highlighted');
+        }
+    });
+
+    document.querySelectorAll('.section-group-wrapper').forEach(el => {
+        const num = el.dataset.groupNumber;
+        if (highlighted.has(num)) {
+            el.classList.add('highlighted');
+            el.classList.remove('dimmed');
+        } else {
+            el.classList.add('dimmed');
+            el.classList.remove('highlighted');
+        }
+    });
+
+    // Draw arrows
+    drawArrowsForSection(sectionNum);
+}
+
+function clearHighlights() {
+    document.querySelectorAll('.section-card-wrapper, .section-group-wrapper').forEach(el => {
+        el.classList.remove('dimmed', 'highlighted');
+    });
+    clearArrows();
+}
+
+// Set up hover event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    updateSvgSize();
+
+    // Add hover listeners to all cards - control flip via JS for better timing control
+    document.querySelectorAll('.section-card-wrapper').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            const cardEl = this;
+            const sectionNum = this.dataset.sectionNumber;
+
+            // Use requestAnimationFrame to batch the changes and avoid layout thrashing
+            requestAnimationFrame(() => {
+                cardEl.classList.add('flipped');
+                if (sectionNum) {
+                    highlightSection(sectionNum);
+                }
+            });
+        });
+
+        card.addEventListener('mouseleave', function() {
+            const cardEl = this;
+            requestAnimationFrame(() => {
+                cardEl.classList.remove('flipped');
+                clearHighlights();
+            });
+        });
+    });
+
+    // Add hover listeners to groups
+    document.querySelectorAll('.section-group-wrapper').forEach(group => {
+        group.addEventListener('mouseenter', function(e) {
+            // Only trigger on group itself, not bubbled from children
+            if (e.target === this || e.target.classList.contains('section-group-title')) {
+                const groupNum = this.dataset.groupNumber;
+                if (groupNum) {
+                    highlightSection(groupNum);
+                }
+            }
+        });
+
+        group.addEventListener('mouseleave', function() {
+            clearHighlights();
+        });
+    });
+
+    // Resize handling
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(updateSvgSize, 200);
+    });
+
+    window.addEventListener('load', function() {
+        setTimeout(updateSvgSize, 200);
+    });
+});
+</script>
 {% endblock %}

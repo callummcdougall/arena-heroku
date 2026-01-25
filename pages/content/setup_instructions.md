@@ -37,7 +37,7 @@ Each day has its own directory containing exercise/solution notebooks, `solution
 
 ## Exercise format
 
-Each day typically takes ~1 day to complete and follows this structure: **Reading Material** → **Setup Code** → **Exercises** → **Bonus** (optional).
+Each day typically takes ~1 day to complete and usually follows this rough structure: **Reading Material** → **Setup Code** → **Exercises** (several sections) → **Bonus** (optional).
 
 Exercises come with difficulty/importance ratings and time estimates:
 
@@ -58,7 +58,7 @@ Solutions appear in dropdowns below exercises. **Use hints liberally** - they're
 
 ### System requirements
 
-- **GPU**: 8GB+ VRAM (12GB+ ideal). We recommend **RTX 3060** or **RTX A4000** - see pricing on [VastAI](https://vast.ai/pricing).
+- **GPU**: 8GB+ VRAM (12GB+ ideal). We recommend **RTX 3060** or **RTX A4000** - see pricing on [VastAI](https://vast.ai/pricing). For heavier-duty exercises (e.g. sections 1.6.X of the interpretability chapter) you might need an A100, but the rest of the content here assumes you're using RTX 3000-series or A4000/A5000.
 - **RAM**: 16GB is plenty (rule of thumb: 2x VRAM).
 - **Storage**: 50GB should suffice.
 - **Bandwidth**: 100Mbps+ recommended for downloading models/datasets.
@@ -112,7 +112,7 @@ We recommend **VastAI** (cheapest, most flexible) or **Lambda Labs** (easiest se
     </tr>
     <tr>
         <td><strong>Cost</strong></td>
-        <td>Cheapest (~$0.10-0.30/day idle, <$2/day active)</td>
+        <td>Cheapest ($2/day when active)</td>
         <td>Mid-range</td>
         <td>Most expensive (~$0.50-0.80/hour)</td>
     </tr>

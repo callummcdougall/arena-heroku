@@ -10,9 +10,9 @@ For this and related questions, see our [informational site](https://www.arena.e
 
 ## Does this page replace the Streamlit page?
 
-The Streamlit page will still exist, and it will contain exactly the same material. Both the Streamlit page and this website display material from the same [GitHub repo](https://github.com/callummcdougall/ARENA_3.0), which we have no plans to change.
+You can use either this website or the Streamlit page - both will still exist & be supported going forwards (they both pull material from the same [GitHub repo](https://github.com/callummcdougall/ARENA_3.0), which is also the repo that hosts the exercises).
 
-The purpose of this page is to provide a more user-friendly way to browse the material, with more polished extra features like an improved chatbot, ability to download exercise context, etc. We created this page because the content was growing very large, and Streamlit no longer provided the flexibility we wanted to create the ideal studying experience.
+Going forward, we recommend people use this website rather than the Streamlit page, because it provides an improved user experience (e.g. better chatbot, ability to download exercise context, etc). We created it because the course was getting too large & complex for Streamlit to give us the flexibility we wanted.
 
 ---
 
