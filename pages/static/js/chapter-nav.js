@@ -306,6 +306,11 @@
             renderSection(data);
             updateActiveStates();
 
+            // Update right sidebar context selection
+            if (window.rightSidebarSelectSection) {
+                window.rightSidebarSelectSection(sectionId);
+            }
+
         } catch (error) {
             console.error('Failed to load section:', error);
             showError('Failed to load section. Please try again.');

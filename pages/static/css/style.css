@@ -91,6 +91,39 @@
     padding: 0;
 }
 
+/* --------------------------------------------------------------------------
+   Custom Scrollbars - Modern Minimalistic Style
+   -------------------------------------------------------------------------- */
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+}
+
+/* Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
 html {
     font-size: 16px;
     scroll-behavior: smooth;
@@ -278,7 +311,7 @@ img {
 }
 
 .hero-description {
-    font-size: 1.125rem;
+    font-size: 0.95rem;
     color: var(--color-text-secondary);
     max-width: 600px;
     margin: 0 auto;
@@ -294,11 +327,47 @@ img {
     color: var(--color-primary-hover);
 }
 
+/* Quality section below chapter cards */
+.quality-section {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-lg);
+    text-align: center;
+}
+
+.quality-text {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    max-width: 700px;
+    margin: 0 auto var(--spacing-lg);
+    line-height: 1.6;
+}
+
+.quality-image {
+    max-width: 50%;
+    min-width: 300px;
+    height: auto;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Invert quality image for dark mode */
+[data-theme="dark"] .quality-image {
+    filter: invert(1);
+}
+
 /* Force 4 columns for chapter grid */
 .chapters-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing-lg);
+    align-items: stretch;
+}
+
+/* Chapter card container - holds card and dropdown */
+.chapter-card-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .chapter-card {
@@ -311,6 +380,8 @@ img {
     transition: all var(--transition-normal);
     position: relative;
     overflow: hidden;
+    z-index: 2;
+    flex: 1;
 }
 
 .chapter-card::before {
@@ -325,14 +396,94 @@ img {
     transition: opacity var(--transition-fast);
 }
 
-.chapter-card:hover {
+.chapter-card-container:hover .chapter-card {
     border-color: var(--chapter-color);
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
-.chapter-card:hover::before {
+.chapter-card-container:hover .chapter-card::before {
     opacity: 1;
+}
+
+/* Chapter sections dropdown */
+.chapter-sections-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-surface);
+    border: 1px solid var(--chapter-color);
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.25s ease,
+                transform 0.25s ease;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.chapter-card-container:hover .chapter-sections-dropdown {
+    max-height: 530px;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.sections-dropdown-inner {
+    padding: var(--spacing-sm);
+    max-height: 510px;
+    overflow-y: auto;
+}
+
+.section-dropdown-item {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    transition: background var(--transition-fast);
+    text-decoration: none;
+}
+
+.section-dropdown-item:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.section-dropdown-number {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--chapter-color);
+    min-width: 2rem;
+    flex-shrink: 0;
+    padding-top: 2px;
+}
+
+.section-dropdown-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.section-dropdown-title {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text);
+    line-height: 1.3;
+}
+
+.section-dropdown-desc {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+    line-height: 1.4;
 }
 
 .card-header {
@@ -514,7 +665,8 @@ img {
     display: flex;
     flex-direction: column;
     z-index: 99;
-    transition: width 0.2s ease, min-width 0.2s ease, transform 0.2s ease;
+    /* Only transition transform for collapse/expand - width changes should be instant */
+    transition: transform 0.2s ease;
 }
 
 .right-sidebar.collapsed {
@@ -558,7 +710,8 @@ img {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: right 0.2s ease, background 0.15s ease;
+    /* Only transition background color - position changes should be instant */
+    transition: background 0.15s ease;
     color: var(--color-text-secondary);
 }
 
@@ -1206,6 +1359,8 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 .markdown-content {
     max-width: var(--content-max-width);
     margin: 0 auto;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .markdown-content h1 {
@@ -1213,9 +1368,7 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     font-size: 2rem;
     font-weight: 700;
     color: var(--color-text);
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-md);
-    border-bottom: 2px solid var(--chapter-color, var(--color-border));
+    margin-bottom: var(--spacing-md);
 }
 
 .markdown-content h2 {
@@ -1305,6 +1458,7 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     padding: 0.2em 0.4em;
     background: var(--color-bg-tertiary);
     border-radius: var(--radius-sm);
+    word-break: break-all;
 }
 
 .markdown-content pre {
@@ -1370,6 +1524,13 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     margin: var(--spacing-2xl) 0;
     border: none;
     border-top: 1px solid var(--color-border);
+}
+
+/* hr immediately after h1 acts as title underline */
+.markdown-content h1 + hr {
+    margin-top: 0;
+    margin-bottom: var(--spacing-xl);
+    border-top-width: 2px;
 }
 
 /* KaTeX display math wrapper - for protected LaTeX blocks */
@@ -1465,6 +1626,87 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 .faq-placeholder {
     color: var(--color-text-secondary);
     font-size: 1.125rem;
+}
+
+.faq-item {
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.faq-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.faq-question {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+}
+
+.faq-answer {
+    color: var(--color-text);
+    line-height: 1.7;
+}
+
+.faq-answer p {
+    margin-bottom: var(--spacing-sm);
+}
+
+.faq-answer p:last-child {
+    margin-bottom: 0;
+}
+
+.faq-answer ul {
+    margin: var(--spacing-sm) 0;
+    padding-left: var(--spacing-xl);
+}
+
+.faq-answer li {
+    margin-bottom: var(--spacing-sm);
+}
+
+.faq-answer a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.faq-answer a:hover {
+    color: var(--color-primary-hover);
+}
+
+.faq-answer code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    padding: 0.2em 0.4em;
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Static Page Container (FAQ, Setup, etc.)
+   -------------------------------------------------------------------------- */
+
+.static-page-container {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 5rem var(--spacing-lg) 6rem;
+}
+
+.static-page-content {
+    max-width: 100%;
+}
+
+.static-page-content h1 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-lg);
 }
 
 /* --------------------------------------------------------------------------

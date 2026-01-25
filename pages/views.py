@@ -363,7 +363,29 @@ def home(request):
 def faq(request):
     """FAQ page."""
     context = _get_context_base()
+    # Read and render the FAQ markdown
+    markdown_content = _read_local_content("faq.md")
+    rendered_html = _render_markdown(markdown_content)
+    context["content"] = rendered_html
     return render(request, "faq.html", context)
+
+
+@require_GET
+def setup(request):
+    """Setup instructions page."""
+    context = _get_context_base()
+    # Read and render the setup instructions markdown
+    markdown_content = _read_local_content("setup_instructions.md")
+    rendered_html = _render_markdown(markdown_content)
+    context["content"] = rendered_html
+    return render(request, "setup.html", context)
+
+
+@require_GET
+def map_view(request):
+    """Map page."""
+    context = _get_context_base()
+    return render(request, "map.html", context)
 
 
 @require_GET
@@ -563,6 +585,53 @@ def _stream_chat_response(messages: list, model: str):
 
     except Exception as e:
         yield f"Error: {str(e)}"
+
+
+@require_GET
+def static_context_api(request):
+    """
+    API endpoint to get static page content for chat context.
+    Returns the content of faq.md, setup_instructions.md, homepage_info.md,
+    and a summary of all chapters and sections from config.yaml
+    for use as chat context when not on a chapter page.
+    """
+    try:
+        content_parts = []
+
+        # Add course structure summary from chapters
+        chapters = get_all_chapters()
+        if chapters:
+            course_summary = "## ARENA Course Structure\n\n"
+            course_summary += "ARENA (Alignment Research Engineer Accelerator) is a comprehensive curriculum covering:\n\n"
+            for chapter in chapters:
+                course_summary += f"### {chapter['title']}\n"
+                course_summary += f"{chapter['description']}\n\n"
+                course_summary += "**Sections:**\n"
+                for section in chapter.get("sections", []):
+                    if not section.get("is_group"):
+                        number = section.get("number", "")
+                        title = section.get("title", "")
+                        desc = section.get("streamlit_description", "")
+                        if number:
+                            course_summary += f"- **{number} {title}**: {desc}\n"
+                        else:
+                            course_summary += f"- **{title}**: {desc}\n"
+                course_summary += "\n"
+            content_parts.append(course_summary)
+
+        # Read each static content file
+        for filename in ["homepage_info.md", "setup_instructions.md", "faq.md"]:
+            try:
+                file_content = _read_local_content(filename)
+                content_parts.append(f"## {filename}\n\n{file_content}")
+            except Http404:
+                continue
+
+        combined_content = "\n\n---\n\n".join(content_parts)
+        return JsonResponse({"content": combined_content})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 @csrf_exempt

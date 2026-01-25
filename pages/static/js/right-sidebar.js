@@ -18,6 +18,7 @@
     let chatMessages = null;
     let chatModelSelect = null;
     let chatClearBtn = null;
+    let chatHelpTooltip = null;
 
     // GitHub raw content base URL
     const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/callummcdougall/arena-pragmatic-interp/main/';
@@ -50,7 +51,7 @@
      * Get localStorage key for chat history based on chapter
      */
     function getChatStorageKey() {
-        if (!currentChapter) return null;
+        if (!currentChapter) return 'arena_chat_static';
         return `arena_chat_${currentChapter.id}`;
     }
 
@@ -99,7 +100,9 @@
         if (chatHistory.length === 0) {
             const placeholder = document.createElement('div');
             placeholder.className = 'chat-placeholder';
-            placeholder.textContent = 'Ask questions about the exercises...';
+            placeholder.textContent = currentChapter
+                ? 'Ask questions about the exercises...'
+                : 'Ask questions about the ARENA course...';
             chatMessages.appendChild(placeholder);
             return;
         }
@@ -142,6 +145,7 @@
         chatMessages = document.getElementById('chat-messages');
         chatModelSelect = document.getElementById('chat-model');
         chatClearBtn = document.getElementById('chat-clear-btn');
+        chatHelpTooltip = document.getElementById('chat-help-tooltip');
 
         if (!rightSidebar) return;
 
@@ -263,11 +267,22 @@
         const chapterData = document.getElementById('chapter-data');
 
         if (!chapterData || !downloadSection) {
-            // Not on a chapter page - disable download
+            // Not on a chapter page - disable download but still enable chat
             if (downloadSection) {
                 downloadSection.classList.add('disabled');
             }
+            // Update chat help tooltip for non-chapter pages
+            if (chatHelpTooltip) {
+                chatHelpTooltip.textContent = 'Ask questions about the ARENA course. The model has the full course summary and chapter descriptions as context.';
+            }
+            // Load chat history for static pages
+            loadChatHistory();
             return;
+        }
+
+        // On a chapter page - update chat help tooltip accordingly
+        if (chatHelpTooltip) {
+            chatHelpTooltip.textContent = 'Ask questions about the exercises. The model will use the context you\'ve selected above to provide relevant answers.';
         }
 
         // On a chapter page - enable download
@@ -744,16 +759,32 @@ ${file.content}
 
     /**
      * Build context from selected sections for chat
+     * When on a chapter page: uses selected sections
+     * When on other pages (home, FAQ, setup): uses static content
      */
     async function buildChatContext() {
-        const selectedSections = getSelectedSections();
-        const format = document.querySelector('input[name="download-format"]:checked')?.value || 'python';
+        // If we're on a chapter page with selected sections, use those
+        if (currentChapter) {
+            const selectedSections = getSelectedSections();
+            const format = document.querySelector('input[name="download-format"]:checked')?.value || 'python';
 
-        if (selectedSections.length === 0) {
-            return null;
+            if (selectedSections.length > 0) {
+                return await fetchContentForDownload(selectedSections, format);
+            }
         }
 
-        return await fetchContentForDownload(selectedSections, format);
+        // Otherwise, fetch static content for non-chapter pages
+        try {
+            const response = await fetch('/api/static-context/');
+            if (response.ok) {
+                const data = await response.json();
+                return data.content;
+            }
+        } catch (e) {
+            console.warn('Failed to fetch static context:', e);
+        }
+
+        return null;
     }
 
     /**
@@ -869,6 +900,28 @@ ${file.content}
             isStreaming = false;
         }
     }
+
+    /**
+     * Select only the specified section in the context checkboxes
+     * Called when navigating to a new section via left sidebar
+     */
+    function selectSection(sectionId) {
+        if (!downloadSectionsContainer) return;
+
+        currentSectionId = sectionId;
+
+        // Update all checkboxes - only check the specified section
+        const checkboxes = downloadSectionsContainer.querySelectorAll('input[name="download-section"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = (checkbox.value === sectionId);
+        });
+
+        // Update token estimate
+        updateTokenEstimate();
+    }
+
+    // Expose function globally for chapter-nav.js to call
+    window.rightSidebarSelectSection = selectSection;
 
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {

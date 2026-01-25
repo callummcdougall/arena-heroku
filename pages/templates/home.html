@@ -16,56 +16,83 @@
 
     <section class="chapters-grid">
         {% for chapter in chapters %}
-        <a href="/{{ chapter.id }}/" class="chapter-card" style="--chapter-color: {{ chapter.color }}">
-            <div class="card-header">
-                <span class="card-number">{{ forloop.counter0 }}</span>
-                <div class="card-icon" aria-hidden="true">
-                    {% if chapter.icon == 'foundation' %}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="6" width="20" height="12" rx="2"></rect>
-                        <path d="M12 12h.01"></path>
-                        <path d="M17 12h.01"></path>
-                        <path d="M7 12h.01"></path>
-                    </svg>
-                    {% elif chapter.icon == 'microscope' %}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6 18h8"></path>
-                        <path d="M3 22h18"></path>
-                        <path d="M14 22a7 7 0 1 0 0-14h-1"></path>
-                        <path d="M9 14h2"></path>
-                        <path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"></path>
-                        <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"></path>
-                    </svg>
-                    {% elif chapter.icon == 'gamepad' %}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="6" y1="12" x2="10" y2="12"></line>
-                        <line x1="8" y1="10" x2="8" y2="14"></line>
-                        <line x1="15" y1="13" x2="15.01" y2="13"></line>
-                        <line x1="18" y1="11" x2="18.01" y2="11"></line>
-                        <rect x="2" y="6" width="20" height="12" rx="2"></rect>
-                    </svg>
-                    {% elif chapter.icon == 'clipboard-check' %}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                        <path d="M9 14l2 2 4-4"></path>
-                    </svg>
+        <div class="chapter-card-container" style="--chapter-color: {{ chapter.color }}">
+            <a href="/{{ chapter.id }}/" class="chapter-card">
+                <div class="card-header">
+                    <span class="card-number">{{ forloop.counter0 }}</span>
+                    <div class="card-icon" aria-hidden="true">
+                        {% if chapter.icon == 'foundation' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                            <path d="M12 12h.01"></path>
+                            <path d="M17 12h.01"></path>
+                            <path d="M7 12h.01"></path>
+                        </svg>
+                        {% elif chapter.icon == 'microscope' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 18h8"></path>
+                            <path d="M3 22h18"></path>
+                            <path d="M14 22a7 7 0 1 0 0-14h-1"></path>
+                            <path d="M9 14h2"></path>
+                            <path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"></path>
+                            <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"></path>
+                        </svg>
+                        {% elif chapter.icon == 'gamepad' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="6" y1="12" x2="10" y2="12"></line>
+                            <line x1="8" y1="10" x2="8" y2="14"></line>
+                            <line x1="15" y1="13" x2="15.01" y2="13"></line>
+                            <line x1="18" y1="11" x2="18.01" y2="11"></line>
+                            <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                        </svg>
+                        {% elif chapter.icon == 'clipboard-check' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                            <path d="M9 14l2 2 4-4"></path>
+                        </svg>
+                        {% endif %}
+                    </div>
+                </div>
+                <h2 class="card-title">{{ chapter.short_title }}</h2>
+                <p class="card-description">{{ chapter.description }}</p>
+                <div class="card-footer">
+                    <span class="section-count">{{ chapter.section_count }} sections</span>
+                    <span class="card-arrow">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </span>
+                </div>
+            </a>
+            <div class="chapter-sections-dropdown">
+                <div class="sections-dropdown-inner">
+                    {% for section in chapter.sections %}
+                    {% if not section.is_group %}
+                    <a href="/{{ chapter.id }}/{{ section.id }}/" class="section-dropdown-item">
+                        <span class="section-dropdown-number">{{ section.number }}</span>
+                        <div class="section-dropdown-content">
+                            <span class="section-dropdown-title">{{ section.title }}</span>
+                            <span class="section-dropdown-desc">{{ section.streamlit_description_short }}</span>
+                        </div>
+                    </a>
                     {% endif %}
+                    {% endfor %}
                 </div>
             </div>
-            <h2 class="card-title">{{ chapter.short_title }}</h2>
-            <p class="card-description">{{ chapter.description }}</p>
-            <div class="card-footer">
-                <span class="section-count">{{ chapter.section_count }} sections</span>
-                <span class="card-arrow">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                </span>
-            </div>
-        </a>
+        </div>
         {% endfor %}
+    </section>
+
+    <section class="quality-section">
+        <p class="quality-text">
+            To avoid the slopification of learning, we ensure that every chapter of content is written and reviewed by domain experts. We regularly add to the material to keep pace with new fields in AI safety.
+        </p>
+        <img src="{% static 'images/gptzero.png' %}" alt="Human-written content verification" class="quality-image">
+        <p class="quality-text">
+            Join our Slack group <a href="https://join.slack.com/t/arena-uk/shared_invite/zt-39iwnhbj4-pMWUvZkkt2wpvkvJ0q2rRQ"><u>here</u></a> to ask questions / discuss the material!
+        </p>
     </section>
 </div>
 {% endblock %}
