@@ -542,7 +542,9 @@ def token_count_api(request):
         if not text:
             return JsonResponse({"tokens": 0})
 
-        tokens = _tiktoken_encoder.encode(text)
+        # Use allowed_special="all" to handle markdown content that may contain
+        # sequences resembling special tokens (e.g., <|endoftext|>)
+        tokens = _tiktoken_encoder.encode(text, allowed_special="all")
         return JsonResponse({"tokens": len(tokens)})
 
     except json.JSONDecodeError:

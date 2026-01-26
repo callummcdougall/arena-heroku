@@ -378,7 +378,8 @@
 
             fileCache[section.id] = {
                 python: { content: null, tokens: null },
-                markdown: { content: null, tokens: null }
+                markdown: { content: null, tokens: null },
+                markdown_no_solutions: { content: null, tokens: null }
             };
 
             // Fetch Python file
@@ -411,7 +412,8 @@
             if (!fileCache[sectionId]) {
                 fileCache[sectionId] = {
                     python: { content: null, tokens: null },
-                    markdown: { content: null, tokens: null }
+                    markdown: { content: null, tokens: null },
+                    markdown_no_solutions: { content: null, tokens: null }
                 };
             }
 
@@ -433,6 +435,29 @@
                 }
             } catch (tokenError) {
                 console.warn('Token count API failed, will show loading...', tokenError);
+            }
+
+            // For markdown, also compute and cache the no-solutions version
+            if (type === 'markdown') {
+                const noSolutionsContent = removeSolutions(content);
+                fileCache[sectionId].markdown_no_solutions.content = noSolutionsContent;
+
+                try {
+                    const noSolnResponse = await fetch('/api/token-count/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ text: noSolutionsContent })
+                    });
+
+                    if (noSolnResponse.ok) {
+                        const noSolnData = await noSolnResponse.json();
+                        fileCache[sectionId].markdown_no_solutions.tokens = noSolnData.tokens;
+                    }
+                } catch (tokenError) {
+                    console.warn('Token count API failed for no-solutions version', tokenError);
+                }
             }
 
             // Update token estimate after caching
@@ -463,8 +488,8 @@
                 return;
             }
 
-            // For markdown_no_solutions, use markdown tokens as approximation
-            const cacheFormat = format === 'markdown_no_solutions' ? 'markdown' : format;
+            // Use the actual format for cache lookup
+            const cacheFormat = format;
 
             let totalTokens = 0;
             let allLoaded = true;
