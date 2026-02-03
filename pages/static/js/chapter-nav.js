@@ -426,7 +426,14 @@
         if (!statusBanner) return;
 
         const status = section?.status;
-        const isComplete = !status || status === "All exercises complete and verified";
+        
+        // Only show status banner if status exists
+        if (!status) {
+            statusBanner.style.display = 'none';
+            return;
+        }
+
+        const isComplete = status === "All exercises complete and verified";
 
         statusBanner.style.display = 'flex';
         
@@ -438,7 +445,7 @@
                     <path d="m21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c.84 0 1.65.12 2.42.34"></path>
                 </svg>
                 <div class="status-banner-content">
-                    <strong>Exercise Status:</strong> Fully complete and verified
+                    <strong>Exercise Status:</strong> ${escapeHtml(status)}
                 </div>
             `;
         } else {

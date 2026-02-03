@@ -15,6 +15,7 @@ The exercises in this section are:
 - **1.3.1 Probing for Deception**: Train linear probes to detect deceptive behaviour in language models
 - **1.3.2 Function Vectors & Model Steering**: Extract and apply function vectors to steer model outputs
 - **1.3.3 Interpretability with SAEs**: Hands-on exploration of sparse autoencoders for finding interpretable features
+- **1.3.4 Activation Oracles**: Explore and understand activation oracles for recovering information from model internals
 
 ## Prerequisites
 
