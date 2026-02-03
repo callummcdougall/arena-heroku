@@ -1,6 +1,17 @@
 from django.urls import path
 
-from .views import chapter_view, chat_api, faq, home, map_view, section_api, setup, static_context_api, token_count_api
+from .views import (
+    chapter_view,
+    chat_api,
+    download_papers_api,
+    faq,
+    home,
+    map_view,
+    section_api,
+    setup,
+    static_context_api,
+    token_count_api,
+)
 
 urlpatterns = [
     path("", home, name="home"),
@@ -15,6 +26,8 @@ urlpatterns = [
     path("api/chat/", chat_api, name="chat_api"),
     # API endpoint for static page context (for chat on non-chapter pages)
     path("api/static-context/", static_context_api, name="static_context_api"),
+    # API endpoint for downloading papers
+    path("api/download-papers/", download_papers_api, name="download_papers_api"),
     # Chapter overview (no section selected)
     path("<str:chapter_id>/", chapter_view, name="chapter"),
     # Section view (with optional subsection)

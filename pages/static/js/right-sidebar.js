@@ -488,6 +488,12 @@
                 return;
             }
 
+            // Papers don't have token counts (they're PDFs/text files, not context)
+            if (format === 'papers') {
+                downloadBtnTokens.textContent = '';
+                return;
+            }
+
             // Use the actual format for cache lookup
             const cacheFormat = format;
 
@@ -555,10 +561,14 @@
                 const btnText = downloadBtn.querySelector('.download-btn-text');
                 if (btnText) btnText.textContent = 'Downloading...';
 
-                const content = await fetchContentForDownload(selectedSections, format);
-
-                if (content) {
-                    downloadAsFile(content, selectedSections, format);
+                // Handle papers download separately (uses backend API)
+                if (format === 'papers') {
+                    await downloadPapers(selectedSections);
+                } else {
+                    const content = await fetchContentForDownload(selectedSections, format);
+                    if (content) {
+                        downloadAsFile(content, selectedSections, format);
+                    }
                 }
 
             } catch (e) {
@@ -570,6 +580,36 @@
                 if (btnText) btnText.textContent = 'Download';
             }
         });
+    }
+
+    /**
+     * Download papers for selected sections via backend API
+     */
+    async function downloadPapers(selectedSectionIds) {
+        const response = await fetch('/api/download-papers/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ section_ids: selectedSectionIds })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Failed to download papers: ${response.status}`);
+        }
+
+        // Get the ZIP file as a blob and trigger download
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'arena_papers.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     /**
