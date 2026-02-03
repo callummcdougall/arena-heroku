@@ -21,6 +21,7 @@
     let subsectionList = null;
     let tocContainer = null;
     let tocList = null;
+    let statusBanner = null;
     let sidebar = null;
     let sidebarToggle = null;
     let resizeHandle = null;
@@ -36,6 +37,7 @@
         subsectionList = document.getElementById('subsection-list');
         tocContainer = document.getElementById('sidebar-toc');
         tocList = document.getElementById('toc-list');
+        statusBanner = document.getElementById('status-banner');
 
         if (!contentArea) {
             console.warn('Chapter navigation: content-area not found');
@@ -108,7 +110,6 @@
         const savedWidth = localStorage.getItem('sidebarWidth');
         if (savedWidth) {
             sidebar.style.width = savedWidth + 'px';
-            updateTogglePosition(parseInt(savedWidth));
         }
 
         // Load collapsed state
@@ -118,9 +119,9 @@
             if (sidebarToggle) sidebarToggle.classList.add('collapsed');
         }
 
-        // Toggle button click
+        // Toggle button click - only expands (button is only visible when collapsed)
         if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarToggle.addEventListener('click', expandSidebar);
         }
 
         // Resize handle drag
@@ -130,25 +131,36 @@
     }
 
     /**
-     * Toggle sidebar collapsed state
+     * Expand sidebar (called when toggle button is clicked while collapsed)
      */
-    function toggleSidebar() {
+    function expandSidebar() {
         if (!sidebar || !sidebarToggle) return;
 
-        const isCollapsed = sidebar.classList.toggle('collapsed');
-        sidebarToggle.classList.toggle('collapsed', isCollapsed);
+        // Only expand if currently collapsed
+        if (!sidebar.classList.contains('collapsed')) return;
 
-        localStorage.setItem('sidebarCollapsed', isCollapsed);
+        sidebar.classList.remove('collapsed');
+        sidebarToggle.classList.remove('collapsed');
+        localStorage.setItem('sidebarCollapsed', 'false');
 
-        if (!isCollapsed) {
-            // Restore width when expanding
-            const savedWidth = localStorage.getItem('sidebarWidth');
-            if (savedWidth) {
-                updateTogglePosition(parseInt(savedWidth));
-            } else {
-                updateTogglePosition(280); // Default width
-            }
+        // Restore width when expanding
+        const savedWidth = localStorage.getItem('sidebarWidth');
+        if (savedWidth) {
+            sidebar.style.width = savedWidth + 'px';
+        } else {
+            sidebar.style.width = '280px'; // Default width
         }
+    }
+
+    /**
+     * Collapse sidebar (called when dragged small enough)
+     */
+    function collapseSidebar() {
+        if (!sidebar || !sidebarToggle) return;
+
+        sidebar.classList.add('collapsed');
+        sidebarToggle.classList.add('collapsed');
+        localStorage.setItem('sidebarCollapsed', 'true');
     }
 
     /**
@@ -158,6 +170,7 @@
         let isResizing = false;
         let startX = 0;
         let startWidth = 0;
+        const COLLAPSE_THRESHOLD = 100; // Collapse when dragged below this width
 
         resizeHandle.addEventListener('mousedown', function(e) {
             isResizing = true;
@@ -176,14 +189,24 @@
             const diff = e.clientX - startX;
             let newWidth = startWidth + diff;
 
-            // Clamp to min/max
-            newWidth = Math.max(200, Math.min(450, newWidth));
+            // Collapse immediately when dragged below threshold
+            if (newWidth < COLLAPSE_THRESHOLD) {
+                isResizing = false;
+                sidebar.classList.remove('resizing');
+                resizeHandle.classList.remove('active');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                collapseSidebar();
+                return;
+            }
+
+            // Clamp to max
+            newWidth = Math.min(450, newWidth);
 
             sidebar.style.width = newWidth + 'px';
-            updateTogglePosition(newWidth);
         });
 
-        document.addEventListener('mouseup', function() {
+        document.addEventListener('mouseup', function(e) {
             if (!isResizing) return;
 
             isResizing = false;
@@ -193,18 +216,9 @@
             document.body.style.userSelect = '';
 
             // Save width to localStorage
-            const width = sidebar.offsetWidth;
-            localStorage.setItem('sidebarWidth', width);
+            const finalWidth = sidebar.offsetWidth;
+            localStorage.setItem('sidebarWidth', finalWidth);
         });
-    }
-
-    /**
-     * Update toggle button position based on sidebar width
-     */
-    function updateTogglePosition(width) {
-        if (sidebarToggle && !sidebar.classList.contains('collapsed')) {
-            sidebarToggle.style.left = width + 'px';
-        }
     }
 
     /**
@@ -389,6 +403,9 @@
      * Render a section
      */
     function renderSection(data) {
+        // Update status banner
+        updateStatusBanner(data.section);
+
         // Update subsection list
         renderSubsectionList(data.subsections);
 
@@ -400,6 +417,52 @@
         } else {
             contentArea.innerHTML = '<p>No content available.</p>';
         }
+    }
+
+    /**
+     * Update the status banner based on section status
+     */
+    function updateStatusBanner(section) {
+        if (!statusBanner) return;
+
+        const status = section?.status;
+        const isComplete = !status || status === "All exercises complete and verified";
+
+        statusBanner.style.display = 'flex';
+        
+        if (isComplete) {
+            statusBanner.className = 'status-banner status-banner-complete';
+            statusBanner.innerHTML = `
+                <svg class="status-banner-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="m21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c.84 0 1.65.12 2.42.34"></path>
+                </svg>
+                <div class="status-banner-content">
+                    <strong>Status:</strong> Fully complete and verified
+                </div>
+            `;
+        } else {
+            statusBanner.className = 'status-banner';
+            statusBanner.innerHTML = `
+                <svg class="status-banner-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <div class="status-banner-content">
+                    <strong>Status:</strong> ${escapeHtml(status)}
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     /**
@@ -559,6 +622,12 @@
      */
     function showLoading() {
         if (!contentArea) return;
+        
+        // Hide status banner during loading
+        if (statusBanner) {
+            statusBanner.style.display = 'none';
+        }
+        
         contentArea.innerHTML = `
             <div class="loading-indicator">
                 <div class="loading-spinner"></div>

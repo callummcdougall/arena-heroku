@@ -8,7 +8,7 @@
     <!-- Sidebar toggle button -->
     <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
+            <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
     </button>
 
@@ -108,6 +108,32 @@
                 {% endif %}
             </ol>
         </nav>
+
+        <!-- Status banner -->
+        {% if not section.status or section.status == "All exercises complete and verified" %}
+        <div class="status-banner status-banner-complete" id="status-banner">
+            <svg class="status-banner-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 11 12 14 22 4"></polyline>
+                <path d="m21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c.84 0 1.65.12 2.42.34"></path>
+            </svg>
+            <div class="status-banner-content">
+                <strong>Exercise Status:</strong> Fully complete and verified
+            </div>
+        </div>
+        {% elif section.status %}
+        <div class="status-banner" id="status-banner">
+            <svg class="status-banner-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div class="status-banner-content">
+                <strong>Exercise Status:</strong> {{ section.status }}
+            </div>
+        </div>
+        {% else %}
+        <div class="status-banner" id="status-banner" style="display: none;"></div>
+        {% endif %}
 
         <div id="content-area">
             {% if current_subsection_data %}

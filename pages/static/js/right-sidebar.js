@@ -169,7 +169,6 @@
         const savedWidth = localStorage.getItem('rightSidebarWidth');
         if (savedWidth) {
             rightSidebar.style.width = savedWidth + 'px';
-            updateTogglePosition(parseInt(savedWidth));
         }
 
         const isCollapsed = localStorage.getItem('rightSidebarCollapsed') === 'true';
@@ -180,25 +179,36 @@
     }
 
     /**
-     * Set up toggle button
+     * Set up toggle button - only expands (button only visible when collapsed)
      */
     function setupToggle() {
         if (!rightSidebarToggle) return;
 
         rightSidebarToggle.addEventListener('click', function() {
-            const isCollapsed = rightSidebar.classList.toggle('collapsed');
-            rightSidebarToggle.classList.toggle('collapsed', isCollapsed);
-            localStorage.setItem('rightSidebarCollapsed', isCollapsed);
+            // Only expand if currently collapsed
+            if (!rightSidebar.classList.contains('collapsed')) return;
 
-            if (!isCollapsed) {
-                const savedWidth = localStorage.getItem('rightSidebarWidth');
-                if (savedWidth) {
-                    updateTogglePosition(parseInt(savedWidth));
-                } else {
-                    updateTogglePosition(300);
-                }
+            rightSidebar.classList.remove('collapsed');
+            rightSidebarToggle.classList.remove('collapsed');
+            localStorage.setItem('rightSidebarCollapsed', 'false');
+
+            // Restore width when expanding
+            const savedWidth = localStorage.getItem('rightSidebarWidth');
+            if (savedWidth) {
+                rightSidebar.style.width = savedWidth + 'px';
+            } else {
+                rightSidebar.style.width = '300px';
             }
         });
+    }
+
+    /**
+     * Collapse the right sidebar
+     */
+    function collapseRightSidebar() {
+        rightSidebar.classList.add('collapsed');
+        rightSidebarToggle.classList.add('collapsed');
+        localStorage.setItem('rightSidebarCollapsed', 'true');
     }
 
     /**
@@ -210,6 +220,7 @@
         let isResizing = false;
         let startX = 0;
         let startWidth = 0;
+        const COLLAPSE_THRESHOLD = 100; // Collapse when dragged below this width
 
         rightResizeHandle.addEventListener('mousedown', function(e) {
             isResizing = true;
@@ -225,15 +236,25 @@
         document.addEventListener('mousemove', function(e) {
             if (!isResizing) return;
 
-            // For right sidebar, dragging left increases width
-            const diff = startX - e.clientX;
-            let newWidth = startWidth + diff;
+            // For right sidebar, dragging right decreases width (opposite of left sidebar)
+            const diff = e.clientX - startX;
+            let newWidth = startWidth - diff;
 
-            // Clamp to min/max
-            newWidth = Math.max(240, Math.min(400, newWidth));
+            // Collapse immediately when dragged below threshold
+            if (newWidth < COLLAPSE_THRESHOLD) {
+                isResizing = false;
+                rightSidebar.classList.remove('resizing');
+                rightResizeHandle.classList.remove('active');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                collapseRightSidebar();
+                return;
+            }
+
+            // Clamp to max
+            newWidth = Math.min(400, newWidth);
 
             rightSidebar.style.width = newWidth + 'px';
-            updateTogglePosition(newWidth);
         });
 
         document.addEventListener('mouseup', function() {
@@ -246,18 +267,9 @@
             document.body.style.userSelect = '';
 
             // Save width
-            const width = rightSidebar.offsetWidth;
-            localStorage.setItem('rightSidebarWidth', width);
+            const finalWidth = rightSidebar.offsetWidth;
+            localStorage.setItem('rightSidebarWidth', finalWidth);
         });
-    }
-
-    /**
-     * Update toggle button position
-     */
-    function updateTogglePosition(width) {
-        if (rightSidebarToggle && !rightSidebar.classList.contains('collapsed')) {
-            rightSidebarToggle.style.right = width + 'px';
-        }
     }
 
     /**

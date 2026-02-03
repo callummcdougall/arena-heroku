@@ -574,7 +574,7 @@ img {
 
 .chapter-sidebar {
     width: var(--sidebar-width);
-    min-width: 200px;
+    min-width: 0; /* Allow shrinking for drag-to-collapse */
     max-width: 450px;
     flex-shrink: 0;
     background: var(--color-bg-secondary);
@@ -583,12 +583,11 @@ img {
     top: var(--nav-height);
     height: calc(100vh - var(--nav-height));
     overflow-y: auto;
-    transition: width 0.2s ease, min-width 0.2s ease;
+    transition: width 0.2s ease;
 }
 
 .chapter-sidebar.collapsed {
     width: 0 !important;
-    min-width: 0 !important;
     overflow: hidden;
     border-right: none;
 }
@@ -615,22 +614,22 @@ img {
     background: var(--chapter-color, var(--color-primary));
 }
 
-/* Sidebar toggle button */
+/* Sidebar toggle button - only visible when collapsed */
 .sidebar-toggle {
     position: fixed;
-    left: var(--sidebar-width);
+    left: var(--spacing-sm);
     top: calc(var(--nav-height) + var(--spacing-md));
     z-index: 101;
     width: 24px;
     height: 24px;
-    display: flex;
+    display: none; /* Hidden by default when sidebar is expanded */
     align-items: center;
     justify-content: center;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: left 0.2s ease, background 0.15s ease;
+    transition: background 0.15s ease;
     color: var(--color-text-secondary);
 }
 
@@ -640,17 +639,13 @@ img {
 }
 
 .sidebar-toggle.collapsed {
-    left: var(--spacing-sm);
+    display: flex; /* Only show when collapsed */
 }
 
 .sidebar-toggle svg {
     width: 14px;
     height: 14px;
-    transition: transform 0.2s ease;
-}
-
-.sidebar-toggle.collapsed svg {
-    transform: rotate(180deg);
+    /* Arrow points right (to expand) */
 }
 
 /* --------------------------------------------------------------------------
@@ -662,7 +657,7 @@ img {
     right: 0;
     top: var(--nav-height);
     width: var(--right-sidebar-width);
-    min-width: 240px;
+    min-width: 0; /* Allow shrinking for drag-to-collapse */
     max-width: 400px;
     height: calc(100vh - var(--nav-height));
     background: var(--color-bg-secondary);
@@ -700,22 +695,21 @@ img {
     background: var(--color-primary);
 }
 
-/* Right sidebar toggle button */
+/* Right sidebar toggle button - only visible when collapsed */
 .right-sidebar-toggle {
     position: fixed;
-    right: var(--right-sidebar-width);
+    right: var(--spacing-sm);
     top: calc(var(--nav-height) + var(--spacing-md));
     z-index: 101;
     width: 24px;
     height: 24px;
-    display: flex;
+    display: none; /* Hidden by default when sidebar is expanded */
     align-items: center;
     justify-content: center;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    /* Only transition background color - position changes should be instant */
     transition: background 0.15s ease;
     color: var(--color-text-secondary);
 }
@@ -726,17 +720,13 @@ img {
 }
 
 .right-sidebar-toggle.collapsed {
-    right: var(--spacing-sm);
+    display: flex; /* Only show when collapsed */
 }
 
 .right-sidebar-toggle svg {
     width: 14px;
     height: 14px;
-    transition: transform 0.2s ease;
-}
-
-.right-sidebar-toggle.collapsed svg {
-    transform: rotate(180deg);
+    /* Arrow points left (to expand) */
 }
 
 /* Right sidebar sections */
@@ -1322,6 +1312,133 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 .breadcrumb-current span {
     color: var(--color-text);
     font-weight: 500;
+}
+
+/* Status Banner for incomplete sections */
+.status-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+    max-width: var(--content-max-width);
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.15);
+}
+
+.status-banner-icon {
+    flex-shrink: 0;
+    color: #d97706;
+    margin-top: 2px;
+}
+
+.status-banner-content {
+    font-size: 0.925rem;
+    color: #92400e;
+    line-height: 1.5;
+}
+
+.status-banner-content strong {
+    color: #78350f;
+}
+
+/* Dark mode support for status banner */
+@media (prefers-color-scheme: dark) {
+    .status-banner {
+        background: linear-gradient(135deg, #451a03 0%, #78350f 100%);
+        border-color: #d97706;
+    }
+
+    .status-banner-icon {
+        color: #fbbf24;
+    }
+
+    .status-banner-content {
+        color: #fde68a;
+    }
+
+    .status-banner-content strong {
+        color: #fef3c7;
+    }
+}
+
+/* Also support explicit dark mode class */
+[data-theme="dark"] .status-banner {
+    background: linear-gradient(135deg, #451a03 0%, #78350f 100%);
+    border-color: #d97706;
+}
+
+[data-theme="dark"] .status-banner-icon {
+    color: #fbbf24;
+}
+
+[data-theme="dark"] .status-banner-content {
+    color: #fde68a;
+}
+
+[data-theme="dark"] .status-banner-content strong {
+    color: #fef3c7;
+}
+
+/* Status Banner for complete sections */
+.status-banner-complete {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+    border: 1px solid #10b981 !important;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.15) !important;
+}
+
+.status-banner-complete .status-banner-icon {
+    color: #059669 !important;
+}
+
+.status-banner-complete .status-banner-content {
+    color: #064e3b !important;
+}
+
+.status-banner-complete .status-banner-content strong {
+    color: #022c22 !important;
+}
+
+/* Dark mode support for complete status banner */
+@media (prefers-color-scheme: dark) {
+    .status-banner-complete {
+        background: linear-gradient(135deg, #022c22 0%, #064e3b 100%) !important;
+        border-color: #10b981 !important;
+    }
+
+    .status-banner-complete .status-banner-icon {
+        color: #34d399 !important;
+    }
+
+    .status-banner-complete .status-banner-content {
+        color: #a7f3d0 !important;
+    }
+
+    .status-banner-complete .status-banner-content strong {
+        color: #d1fae5 !important;
+    }
+}
+
+/* Also support explicit dark mode class for complete status */
+[data-theme="dark"] .status-banner-complete {
+    background: linear-gradient(135deg, #022c22 0%, #064e3b 100%) !important;
+    border-color: #10b981 !important;
+}
+
+[data-theme="dark"] .status-banner-complete .status-banner-icon {
+    color: #34d399 !important;
+}
+
+[data-theme="dark"] .status-banner-complete .status-banner-content {
+    color: #a7f3d0 !important;
+}
+
+[data-theme="dark"] .status-banner-complete .status-banner-content strong {
+    color: #d1fae5 !important;
 }
 
 .chapter-overview {

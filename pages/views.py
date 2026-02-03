@@ -46,9 +46,12 @@ def _fetch_text(url: str) -> str:
     token = os.environ.get("GH_TOKEN")
     if token:
         headers["Authorization"] = f"token {token}"
+    print(f"[DEBUG] Fetching URL: {url}")
     r = requests.get(url, headers=headers, timeout=10)
+    print(f"[DEBUG] Response status: {r.status_code}")
     if r.status_code == 404:
-        raise Http404("Content not found")
+        print(f"[DEBUG] 404 Not Found for URL: {url}")
+        raise Http404(f"Content not found: {url}")
     r.raise_for_status()
     return r.text
 
@@ -497,11 +500,18 @@ def section_api(request, chapter_id: str, section_id: str):
     try:
         # Check if this is a local content file (group overview) or remote
         if section.get("local_path"):
+            print(f"[DEBUG] Loading local content: {section['local_path']}")
             text = _read_local_content(section["local_path"])
         else:
-            text = _fetch_text(_raw_url(section["path"]))
+            path = section.get("path")
+            print(f"[DEBUG] Section '{section_id}' path: {path}")
+            if not path:
+                print(f"[DEBUG] WARNING: No 'path' key in section: {section}")
+                raise Http404(f"No path configured for section {section_id}")
+            text = _fetch_text(_raw_url(path))
         subsections = _parse_subsections(text)
-    except Http404:
+    except Http404 as e:
+        print(f"[DEBUG] Http404 caught: {e}")
         subsections = [
             {
                 "index": 0,
@@ -512,6 +522,7 @@ def section_api(request, chapter_id: str, section_id: str):
             }
         ]
     except requests.RequestException as e:
+        print(f"[DEBUG] RequestException caught: {e}")
         subsections = [
             {
                 "index": 0,
