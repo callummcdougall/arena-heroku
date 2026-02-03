@@ -438,7 +438,7 @@
                     <path d="m21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c.84 0 1.65.12 2.42.34"></path>
                 </svg>
                 <div class="status-banner-content">
-                    <strong>Status:</strong> Fully complete and verified
+                    <strong>Exercise Status:</strong> Fully complete and verified
                 </div>
             `;
         } else {
@@ -450,7 +450,7 @@
                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
                 </svg>
                 <div class="status-banner-content">
-                    <strong>Status:</strong> ${escapeHtml(status)}
+                    <strong>Exercise Status:</strong> ${escapeHtml(status)}
                 </div>
             `;
         }
