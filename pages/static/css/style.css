@@ -665,6 +665,7 @@ img {
     display: flex;
     flex-direction: column;
     z-index: 99;
+    overflow-y: auto;
     /* Only transition transform for collapse/expand - width changes should be instant */
     transition: transform 0.2s ease;
 }
@@ -733,6 +734,7 @@ img {
 .right-sidebar-section {
     padding: var(--spacing-md);
     border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
 }
 
 .right-sidebar-header {
@@ -960,16 +962,12 @@ img {
 
 /* Chat section */
 .chat-section {
-    flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
+    flex-shrink: 0;
 }
 
 .chat-messages {
-    flex: 1;
-    overflow-y: auto;
     padding: var(--spacing-sm);
     display: flex;
     flex-direction: column;
@@ -1077,6 +1075,7 @@ img {
     display: flex;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm);
+    padding-bottom: var(--spacing-lg);
     background: var(--color-bg-secondary);
 }
 
