@@ -517,6 +517,11 @@
                 window.renderMath(contentArea);
             }
 
+            // Add copy buttons to code blocks
+            if (window.addCodeCopyButtons) {
+                window.addCodeCopyButtons(contentArea);
+            }
+
             contentArea.style.opacity = '1';
             contentArea.style.transition = 'opacity 150ms';
         }, 100);

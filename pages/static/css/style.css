@@ -916,6 +916,50 @@ img {
     cursor: not-allowed;
 }
 
+/* Download button group (Download + Copy) */
+.download-button-group {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.download-button-group .download-button {
+    flex: 1;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.copy-context-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--chapter-color, var(--color-primary));
+    color: white;
+    border: none;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.copy-context-button:hover {
+    filter: brightness(1.1);
+}
+
+.copy-context-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.copy-context-button.copied {
+    background: #10b981;
+}
+
+[data-theme="dark"] .copy-context-button {
+    color: #111111;
+}
+
 /* Fix dark mode contrast - use dark text on light-colored buttons */
 [data-theme="dark"] .download-button {
     color: #111111;
@@ -1642,12 +1686,55 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 
 /* Pygments syntax highlighting - Light theme (SAS-inspired) */
 .codehilite {
+    position: relative;
     background: var(--color-bg-secondary);
     margin: var(--spacing-md) 0;
     padding: var(--spacing-md);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     overflow-x: auto;
+}
+
+/* Code block copy button */
+.code-copy-button {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    opacity: 0;
+    transition: all var(--transition-fast);
+    z-index: 1;
+}
+
+.codehilite:hover .code-copy-button {
+    opacity: 1;
+}
+
+.code-copy-button:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+    border-color: var(--color-text-muted);
+}
+
+.code-copy-button.copied {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+    opacity: 1;
+}
+
+.code-copy-button svg {
+    width: 14px;
+    height: 14px;
 }
 
 .codehilite pre {

@@ -13,6 +13,7 @@
     let downloadBtn = null;
     let downloadBtnTokens = null;
     let downloadSectionsContainer = null;
+    let copyContextBtn = null;
     let chatInput = null;
     let chatSendBtn = null;
     let chatMessages = null;
@@ -140,6 +141,7 @@
         downloadBtn = document.getElementById('download-btn');
         downloadBtnTokens = document.getElementById('download-btn-tokens');
         downloadSectionsContainer = document.getElementById('download-sections');
+        copyContextBtn = document.getElementById('copy-context-btn');
         chatInput = document.getElementById('chat-input');
         chatSendBtn = document.getElementById('chat-send-btn');
         chatMessages = document.getElementById('chat-messages');
@@ -156,6 +158,7 @@
         setupToggle();
         setupResize();
         setupDownload();
+        setupCopyContext();
         setupChat();
 
         // Update download section state based on current page
@@ -595,6 +598,55 @@
     }
 
     /**
+     * Set up copy to clipboard functionality
+     */
+    function setupCopyContext() {
+        if (!copyContextBtn) return;
+
+        copyContextBtn.addEventListener('click', async function() {
+            if (!currentChapter) {
+                alert('No chapter data available. Please navigate to a chapter page.');
+                return;
+            }
+
+            const selectedSections = getSelectedSections();
+            if (selectedSections.length === 0) {
+                alert('Please select at least one section to copy.');
+                return;
+            }
+
+            try {
+                const format = document.querySelector('input[name="download-format"]:checked')?.value || 'python';
+
+                // Papers can't be copied (they're binary PDFs)
+                if (format === 'papers') {
+                    alert('Papers cannot be copied to clipboard. Please use Download instead.');
+                    return;
+                }
+
+                copyContextBtn.disabled = true;
+
+                const content = await fetchContentForDownload(selectedSections, format);
+                if (content) {
+                    await navigator.clipboard.writeText(content);
+
+                    // Show success feedback
+                    copyContextBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyContextBtn.classList.remove('copied');
+                    }, 1500);
+                }
+
+            } catch (e) {
+                console.error('Copy failed:', e);
+                alert('Failed to copy content. Please try again.');
+            } finally {
+                copyContextBtn.disabled = false;
+            }
+        });
+    }
+
+    /**
      * Download papers for selected sections via backend API
      */
     async function downloadPapers(selectedSectionIds) {
@@ -999,6 +1051,76 @@ ${file.content}
 
     // Expose function globally for chapter-nav.js to call
     window.rightSidebarSelectSection = selectSection;
+
+    /**
+     * Add copy buttons to all code blocks
+     */
+    function addCodeCopyButtons(container) {
+        const codeBlocks = (container || document).querySelectorAll('.codehilite');
+
+        codeBlocks.forEach(block => {
+            // Skip if already has a copy button
+            if (block.querySelector('.code-copy-button')) return;
+
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'code-copy-button';
+            copyBtn.title = 'Copy code';
+            copyBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+            `;
+
+            copyBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Get the code text from the pre element
+                const pre = block.querySelector('pre');
+                if (!pre) return;
+
+                // Get text content (strips HTML tags from syntax highlighting)
+                const code = pre.textContent;
+
+                try {
+                    await navigator.clipboard.writeText(code);
+
+                    // Show success feedback
+                    copyBtn.classList.add('copied');
+                    copyBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    `;
+
+                    setTimeout(() => {
+                        copyBtn.classList.remove('copied');
+                        copyBtn.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        `;
+                    }, 1500);
+                } catch (err) {
+                    console.error('Failed to copy code:', err);
+                }
+            });
+
+            block.appendChild(copyBtn);
+        });
+    }
+
+    // Expose globally so it can be called after AJAX content loads
+    window.addCodeCopyButtons = addCodeCopyButtons;
+
+    // Add copy buttons on initial load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => addCodeCopyButtons());
+    } else {
+        addCodeCopyButtons();
+    }
 
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
