@@ -34,7 +34,9 @@
     --nav-height: 64px;
     --sidebar-width: 280px;
     --right-sidebar-width: 300px;
-    --content-max-width: 800px;
+    /* Use viewport units so container stays same visual width when zooming */
+    /* Zooming changes font size but not container width, allowing more/less text per line */
+    --content-max-width: 52vw;
 }
 
 /* Light Theme (default) */
@@ -1674,7 +1676,9 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .markdown-content pre code {
@@ -1682,6 +1686,9 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     background: transparent;
     font-size: 0.875rem;
     line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 /* Pygments syntax highlighting - Light theme (SAS-inspired) */
@@ -1692,7 +1699,6 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     padding: var(--spacing-md);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    overflow-x: auto;
 }
 
 /* Code block copy button */
@@ -1742,6 +1748,9 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     padding: 0;
     background: transparent;
     border: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 /* Pygments syntax highlighting token colors are in pygments.css */
