@@ -802,7 +802,10 @@
 
         let output = `# Context
 
-This document contains the source code for the relevant ${fileType} files in this project. The file structure is as follows:
+This document contains the source code for the relevant ${fileType} files in this set of exercises. The exercises are part of the ARENA (Alignment Research Engineer Accelerator) course, which is designed to provide a hands-on introduction to AI alignment research topics (e.g. LLM interpretability, reinforcement learning, evaluations) as well as fundamentals of machine learning.
+
+The file structure is as follows:
+
 \`\`\`
 ${fileTree}\`\`\`
 
