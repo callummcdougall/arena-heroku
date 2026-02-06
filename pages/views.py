@@ -222,12 +222,35 @@ def _process_details_content(text: str) -> str:
         for placeholder, code_html in code_blocks.items():
             content = content.replace(placeholder, code_html)
 
-        # Wrap paragraphs (simple heuristic: split by double newline)
+        # Process content blocks (paragraphs and lists)
         paragraphs = content.split("\n\n")
         processed_paragraphs = []
         for p in paragraphs:
             p = p.strip()
-            if p and not p.startswith("<"):
+            if not p:
+                continue
+            # Check if this is a bullet list (lines starting with "- ")
+            lines = p.split("\n")
+            if all(line.strip().startswith("- ") or line.strip() == "" for line in lines if line.strip()):
+                # Convert bullet list to HTML
+                list_items = []
+                for line in lines:
+                    line = line.strip()
+                    if line.startswith("- "):
+                        list_items.append(f"<li>{line[2:]}</li>")
+                if list_items:
+                    p = f"<ul>{''.join(list_items)}</ul>"
+            # Check if this is a numbered list (lines starting with "1. ", "2. ", etc.)
+            elif all(re.match(r"^\d+\.\s", line.strip()) or line.strip() == "" for line in lines if line.strip()):
+                list_items = []
+                for line in lines:
+                    line = line.strip()
+                    if re.match(r"^\d+\.\s", line):
+                        item_text = re.sub(r"^\d+\.\s", "", line)
+                        list_items.append(f"<li>{item_text}</li>")
+                if list_items:
+                    p = f"<ol>{''.join(list_items)}</ol>"
+            elif not p.startswith("<"):
                 p = f"<p>{p}</p>"
             processed_paragraphs.append(p)
         content = "\n".join(processed_paragraphs)
