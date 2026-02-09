@@ -132,6 +132,7 @@
         font-weight: 600;
         min-width: 2.5rem;
         padding-top: 2px;
+        color: var(--section-number-color, var(--color-text));
     }
 
     .chapter-modal .section-info {
@@ -283,8 +284,8 @@
 <template id="modal-sections-{{ chapter.id }}">
     {% for section in chapter.sections %}
     {% if not section.is_group %}
-    <a href="/{{ chapter.id }}/{{ section.id }}/" class="section-item">
-        <span class="section-number" style="color: {{ chapter.color }}">{{ section.number }}</span>
+    <a href="/{{ chapter.id }}/{{ section.id }}/" class="section-item" style="--section-number-color: {{ chapter.color }}">
+        <span class="section-number">{{ section.number }}</span>
         <div class="section-info">
             <div class="section-title">{{ section.title }}</div>
             <div class="section-desc">{{ section.streamlit_description_short }}</div>

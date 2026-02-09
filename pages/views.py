@@ -805,6 +805,10 @@ SECTION_PAPERS = {
         {"arxiv": "2601.10387", "title": "The Assistant Axis"},
         {"arxiv": "2507.21509", "title": "Persona Vectors"},
     ],
+    "45_investigator_agents": [  # 1.6.5 Investigator Agents
+        {"arxiv": "2502.01236", "title": "Eliciting Language Model Behaviours with Investigator Agents"},
+        {"local": "petri_blog_post", "title": "Petri (blog post)"},
+    ],
 }
 
 
