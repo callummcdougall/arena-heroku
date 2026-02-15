@@ -41,6 +41,19 @@
             </ul>
         </nav>
 
+        <div class="sidebar-jump">
+            <div class="sidebar-jump-title">Jump to other chapters:</div>
+            <ul class="sidebar-jump-list">
+                {% for c in chapters %}
+                {% if c.id != chapter.id %}
+                <li>
+                    <a class="sidebar-jump-link" href="/{{ c.id }}/">{{ c.short_title }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+
         <!-- Subsection list (populated by JS or server) -->
         {% if subsections and subsections|length > 1 %}
         <div class="sidebar-subsections">
@@ -143,8 +156,17 @@
             {% elif not current_section %}
             <!-- Chapter overview when no section selected -->
             <div class="chapter-overview">
-                <h1 class="overview-title">{{ chapter.title }}</h1>
-                <p class="overview-description">{{ chapter.description }}</p>
+                <div class="chapter-hero">
+                    <div class="chapter-hero-media" style="background-image: url('{{ chapter.header_image }}');"></div>
+                    <div class="chapter-hero-content">
+                        <h1 class="overview-title">{{ chapter.title }}</h1>
+                        <p class="overview-description">{{ chapter.description }}</p>
+                        <div class="chapter-hero-meta">
+                            <span class="chapter-hero-pill">{{ chapter.short_title }}</span>
+                            <span class="chapter-hero-pill">{{ chapter.section_count }} sections</span>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="sections-preview">
                     <h2>Sections</h2>
@@ -152,11 +174,17 @@
                         {% for section in chapter.sections %}
                         {% if not section.is_group %}
                         <a href="/{{ chapter.id }}/{{ section.id }}/"
-                           class="section-card"
+                           class="section-card section-card-image"
                            data-section-id="{{ section.id }}"
                            data-section-link>
-                            <span class="section-card-number">{{ section.number }}</span>
-                            <span class="section-card-title">{{ section.title }}</span>
+                            <div class="section-card-media" style="background-image: url('{{ section.header_image }}');"></div>
+                            <div class="section-card-body">
+                                <span class="section-card-number">{{ section.number }}</span>
+                                <span class="section-card-title">{{ section.title }}</span>
+                                {% if section.streamlit_description_short %}
+                                <span class="section-card-desc">{{ section.streamlit_description_short }}</span>
+                                {% endif %}
+                            </div>
                             <svg class="section-card-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                                 <polyline points="12 5 19 12 12 19"></polyline>

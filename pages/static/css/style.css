@@ -1193,6 +1193,42 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     margin-top: -0.25rem;
 }
 
+.sidebar-jump {
+    padding: 0 var(--spacing-lg) var(--spacing-lg) var(--spacing-lg);
+}
+
+.sidebar-jump-title {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-xs);
+}
+
+.sidebar-jump-list {
+    list-style: none;
+    display: grid;
+    gap: 0.25rem;
+}
+
+.sidebar-jump-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.sidebar-jump-link:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
 .section-list {
     list-style: none;
 }
@@ -1491,6 +1527,47 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     margin: 0 auto;
 }
 
+.chapter-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--spacing-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.chapter-hero-media {
+    min-height: 200px;
+    aspect-ratio: 4 / 3;
+    background-size: cover;
+    background-position: center;
+}
+
+.chapter-hero-content {
+    padding: var(--spacing-xl);
+}
+
+.chapter-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+.chapter-hero-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--chapter-color) 12%, transparent);
+    color: var(--chapter-color);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
 .overview-title {
     font-family: var(--font-heading);
     font-size: 2rem;
@@ -1502,7 +1579,7 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 .overview-description {
     font-size: 1.125rem;
     color: var(--color-text-secondary);
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: 0;
 }
 
 .sections-preview h2 {
@@ -1514,20 +1591,40 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 }
 
 .sections-grid {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--spacing-lg);
 }
 
 .section-card {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     gap: var(--spacing-md);
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-md);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     transition: all var(--transition-fast);
+}
+
+.section-card-image {
+    min-height: 100%;
+}
+
+.section-card-media {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-secondary);
+}
+
+.section-card-body {
+    width: 100%;
+    display: grid;
+    gap: 0.35rem;
 }
 
 .section-card:hover {
@@ -1549,16 +1646,29 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     color: var(--color-text);
 }
 
+.section-card-desc {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
 .section-card-arrow {
     color: var(--chapter-color);
     opacity: 0;
     transform: translateX(-4px);
     transition: all var(--transition-fast);
+    align-self: flex-end;
 }
 
 .section-card:hover .section-card-arrow {
     opacity: 1;
     transform: translateX(0);
+}
+
+@media (min-width: 900px) {
+    .chapter-hero {
+        grid-template-columns: 0.7fr 1fr;
+    }
 }
 
 /* --------------------------------------------------------------------------
