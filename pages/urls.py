@@ -6,12 +6,23 @@ from .views import (
     download_papers_api,
     faq,
     home,
+    legacy_section_redirect,
     map_view,
     section_api,
     setup,
     static_context_api,
     token_count_api,
 )
+
+# Old section IDs that were moved from chapter1 to chapter4
+_OLD_SECTION_IDS = [
+    "41_emergent_misalignment",
+    "42_science_misalignment",
+    "43_reasoning_models",
+    "44_persona_vectors",
+    "45_investigator_agents",
+    "1_6_overview",
+]
 
 urlpatterns = [
     path("", home, name="home"),
@@ -28,6 +39,18 @@ urlpatterns = [
     path("api/static-context/", static_context_api, name="static_context_api"),
     # API endpoint for downloading papers
     path("api/download-papers/", download_papers_api, name="download_papers_api"),
+]
+
+# Redirects for old chapter1 alignment science section URLs → chapter4
+for _old_id in _OLD_SECTION_IDS:
+    urlpatterns.append(
+        path(f"chapter1_transformer_interp/{_old_id}/", legacy_section_redirect, {"section_id": _old_id}, name=f"redirect_{_old_id}")
+    )
+    urlpatterns.append(
+        path(f"chapter1_transformer_interp/{_old_id}/<str:subsection_id>/", legacy_section_redirect, {"section_id": _old_id}, name=f"redirect_{_old_id}_sub")
+    )
+
+urlpatterns += [
     # Chapter overview (no section selected)
     path("<str:chapter_id>/", chapter_view, name="chapter"),
     # Section view (with optional subsection)

@@ -58,7 +58,7 @@ Solutions appear in dropdowns below exercises. **Use hints liberally** - they're
 
 ### System requirements
 
-- **GPU**: 8GB+ VRAM (12GB+ ideal). We recommend **RTX 3060** or **RTX A4000** - see pricing on [VastAI](https://vast.ai/pricing). For heavier-duty exercises (e.g. sections 1.6.X of the interpretability chapter) you might need an A100, but the rest of the content here assumes you're using RTX 3000-series or A4000/A5000.
+- **GPU**: 8GB+ VRAM (12GB+ ideal). We recommend **RTX 3060** or **RTX A4000** - see pricing on [VastAI](https://vast.ai/pricing). For heavier-duty exercises (e.g. sections 4.X of the alignment science chapter) you might need an A100, but the rest of the content here assumes you're using RTX 3000-series or A4000/A5000.
 - **RAM**: 16GB is plenty (rule of thumb: 2x VRAM).
 - **Storage**: 50GB should suffice.
 - **Bandwidth**: 100Mbps+ recommended for downloading models/datasets.

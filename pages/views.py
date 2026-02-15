@@ -11,7 +11,7 @@ import markdown as md
 import requests
 import tiktoken
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from openai import OpenAI
@@ -379,6 +379,35 @@ def _get_context_base() -> dict:
     return {
         "chapters": get_all_chapters(),
     }
+
+
+# Redirects for old chapter1 alignment science URLs (moved to chapter4)
+OLD_SECTION_REDIRECTS = {
+    "41_emergent_misalignment": "1_emergent_misalignment",
+    "42_science_misalignment": "2_science_misalignment",
+    "43_reasoning_models": "3_reasoning_models",
+    "44_persona_vectors": "4_persona_vectors",
+    "45_investigator_agents": "5_investigator_agents",
+    "1_6_overview": None,  # Group overview no longer exists, redirect to chapter
+}
+
+
+def legacy_section_redirect(request, section_id: str, subsection_id: str | None = None):
+    """Redirect old chapter1_transformer_interp/4X_* URLs to chapter4_alignment_science."""
+    new_section_id = OLD_SECTION_REDIRECTS.get(section_id)
+    if new_section_id is None:
+        # Group overview or unknown — redirect to the chapter page
+        return redirect("/chapter4_alignment_science/", permanent=True)
+    base = f"/chapter4_alignment_science/{new_section_id}/"
+    if subsection_id:
+        base += f"{subsection_id}/"
+    return redirect(base, permanent=True)
+
+
+def custom_404(request, exception):
+    """Custom 404 page with link back to homepage."""
+    context = _get_context_base()
+    return render(request, "404.html", context, status=404)
 
 
 @require_GET
@@ -788,24 +817,24 @@ SECTION_PAPERS = {
         {"arxiv": "2209.10652", "title": "Toy Models of Superposition"},
         {"local": "monosemanticity_2023.txt", "title": "Towards Monosemanticity (2023)"},
     ],
-    "41_emergent_misalignment": [  # 1.6.1 Emergent Misalignment
+    "1_emergent_misalignment": [  # 4.1 Emergent Misalignment
         {"arxiv": "2502.17424", "title": "Emergent Misalignment"},
         {"arxiv": "2506.11618", "title": "Convergent Linear Representations of Emergent Misalignment"},
         {"arxiv": "2506.11613", "title": "Model Organisms for Emergent Misalignment"},
     ],
-    "42_science_misalignment": [  # 1.6.2 Science of Misalignment
+    "2_science_misalignment": [  # 4.2 Science of Misalignment
         {"arxiv": "2412.14093", "title": "Alignment Faking in Large Language Models"},
         {"local": "shutdown_resistance_palisade.txt", "title": "Shutdown resistance in reasoning models"},
         {"local": "shutdown_resistance_followup.txt", "title": "Self-preservation or Instruction Ambiguity"},
     ],
-    "43_reasoning_models": [  # 1.6.3 Thought Anchors
+    "3_reasoning_models": [  # 4.3 Interpreting Reasoning Models
         {"arxiv": "2506.19143", "title": "Thought Anchors: Which LLM Reasoning Steps Matter?"},
     ],
-    "44_persona_vectors": [  # 1.6.4 LLM Psychology & Persona Vectors
+    "4_persona_vectors": [  # 4.4 LLM Psychology & Persona Vectors
         {"arxiv": "2601.10387", "title": "The Assistant Axis"},
         {"arxiv": "2507.21509", "title": "Persona Vectors"},
     ],
-    "45_investigator_agents": [  # 1.6.5 Investigator Agents
+    "5_investigator_agents": [  # 4.5 Investigator Agents
         {"arxiv": "2502.01236", "title": "Eliciting Language Model Behaviours with Investigator Agents"},
         {"local": "petri_blog_post", "title": "Petri (blog post)"},
     ],

@@ -362,10 +362,10 @@ img {
     filter: invert(1);
 }
 
-/* Force 4 columns for chapter grid */
+/* Force 5 columns for chapter grid */
 .chapters-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: var(--spacing-lg);
     align-items: stretch;
 }
@@ -1179,7 +1179,6 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 
 .sidebar-header {
     padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border);
 }
 
 .sidebar-title {
@@ -1190,7 +1189,8 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 }
 
 .sidebar-nav {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
+    margin-top: -0.25rem;
 }
 
 .section-list {

@@ -13,7 +13,9 @@ import yaml
 logger = logging.getLogger(__name__)
 
 # GitHub raw URL for the config file (used in production)
-CONFIG_URL = "https://raw.githubusercontent.com/callummcdougall/arena-pragmatic-interp/main/infrastructure/core/config.yaml"
+CONFIG_URL = (
+    "https://raw.githubusercontent.com/callummcdougall/arena-pragmatic-interp/main/infrastructure/core/config.yaml"
+)
 
 # Local config path (for development) - relative to this file's location
 # Assumes repo structure: arena-app/ is sibling to arena-pragmatic-interp/
@@ -25,7 +27,7 @@ LOCAL_CONFIG_PATHS = [
 # Cache settings
 _config_cache: dict | None = None
 _cache_timestamp: float = 0
-CACHE_TTL_SECONDS = 300  # 5 minutes
+CACHE_TTL_SECONDS = 15  # 15 seconds
 
 
 def _try_load_local_config() -> dict | None:
