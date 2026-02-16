@@ -24,7 +24,14 @@
             </a>
 
             <div class="nav-links">
-                <a href="/" class="nav-link">Content</a>
+                <div class="nav-dropdown">
+                    <a href="/" class="nav-link nav-dropdown-trigger">Content</a>
+                    <div class="nav-dropdown-menu">
+                        {% for chapter in chapters %}
+                        <a href="/{{ chapter.id }}/" class="nav-dropdown-item">{{ chapter.title }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
                 <a href="/map/" class="nav-link">Map</a>
                 <a href="/setup/" class="nav-link">Setup Instructions</a>
                 <a href="/faq/" class="nav-link">FAQ</a>
