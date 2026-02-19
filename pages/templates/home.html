@@ -8,8 +8,11 @@
     /* Modal chapter cards */
     .modal-chapters-grid {
         display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: var(--spacing-lg);
+        max-width: 1050px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .card-icon-emoji {

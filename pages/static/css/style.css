@@ -344,9 +344,9 @@ img {
    -------------------------------------------------------------------------- */
 
 .home-container {
-    max-width: 1500px;
+    max-width: min(1500px, calc(100vw - var(--right-sidebar-width) - 2px));
     margin: 0 auto;
-    padding: var(--spacing-2xl) var(--spacing-lg);
+    padding: var(--spacing-2xl) 5%;
 }
 
 .home-hero {

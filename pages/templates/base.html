@@ -32,7 +32,7 @@
                         {% endfor %}
                     </div>
                 </div>
-                <a href="/map/" class="nav-link">Map</a>
+                <a href="/planner/" class="nav-link">Planner</a>
                 <a href="/setup/" class="nav-link">Setup Instructions</a>
                 <a href="/faq/" class="nav-link">FAQ</a>
             </div>
@@ -258,7 +258,7 @@
                 }
             });
             // Remove active from Content if we're on a specific non-chapter page
-            if (path.startsWith('/map') || path.startsWith('/setup') || path.startsWith('/faq')) {
+            if (path.startsWith('/planner') || path.startsWith('/setup') || path.startsWith('/faq')) {
                 const contentLink = document.querySelector('.nav-link[href="/"]');
                 if (contentLink) contentLink.classList.remove('active');
             }

@@ -172,12 +172,14 @@
         const savedWidth = localStorage.getItem('rightSidebarWidth');
         if (savedWidth) {
             rightSidebar.style.width = savedWidth + 'px';
+            document.documentElement.style.setProperty('--right-sidebar-width', savedWidth + 'px');
         }
 
         const isCollapsed = localStorage.getItem('rightSidebarCollapsed') === 'true';
         if (isCollapsed) {
             rightSidebar.classList.add('collapsed');
             if (rightSidebarToggle) rightSidebarToggle.classList.add('collapsed');
+            document.documentElement.style.setProperty('--right-sidebar-width', '0px');
         }
     }
 
@@ -202,6 +204,7 @@
             } else {
                 rightSidebar.style.width = '300px';
             }
+            document.documentElement.style.setProperty('--right-sidebar-width', rightSidebar.style.width);
         });
     }
 
@@ -212,6 +215,7 @@
         rightSidebar.classList.add('collapsed');
         rightSidebarToggle.classList.add('collapsed');
         localStorage.setItem('rightSidebarCollapsed', 'true');
+        document.documentElement.style.setProperty('--right-sidebar-width', '0px');
     }
 
     /**
@@ -258,6 +262,7 @@
             newWidth = Math.min(400, newWidth);
 
             rightSidebar.style.width = newWidth + 'px';
+            document.documentElement.style.setProperty('--right-sidebar-width', newWidth + 'px');
         });
 
         document.addEventListener('mouseup', function() {

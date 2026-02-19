@@ -396,7 +396,7 @@ def legacy_section_redirect(request, section_id: str, subsection_id: str | None 
     """Redirect old chapter1_transformer_interp/4X_* URLs to chapter4_alignment_science."""
     new_section_id = OLD_SECTION_REDIRECTS.get(section_id)
     if new_section_id is None:
-        # Group overview or unknown — redirect to the chapter page
+        # Group overview or unknown - redirect to the chapter page
         return redirect("/chapter4_alignment_science/", permanent=True)
     base = f"/chapter4_alignment_science/{new_section_id}/"
     if subsection_id:
@@ -440,12 +440,11 @@ def setup(request):
 
 
 @require_GET
-def map_view(request):
-    """Map page - dependency map of course sections."""
+def planner_view(request):
+    """Planner page - interactive week-by-week course schedule builder."""
     context = _get_context_base()
-    # Pass chapters as JSON for JavaScript to render the map
     context["chapters_json"] = json.dumps(context["chapters"])
-    return render(request, "map.html", context)
+    return render(request, "planner.html", context)
 
 
 @require_GET

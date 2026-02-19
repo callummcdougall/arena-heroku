@@ -7,7 +7,7 @@ from .views import (
     faq,
     home,
     legacy_section_redirect,
-    map_view,
+    planner_view,
     section_api,
     setup,
     static_context_api,
@@ -26,7 +26,7 @@ _OLD_SECTION_IDS = [
 
 urlpatterns = [
     path("", home, name="home"),
-    path("map/", map_view, name="map"),
+    path("planner/", planner_view, name="planner"),
     path("setup/", setup, name="setup"),
     path("faq/", faq, name="faq"),
     # API endpoint for fetching section content (used by JavaScript)

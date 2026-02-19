@@ -139,7 +139,7 @@ Sign up for an account [here](https://lambdalabs.com/service/gpu-cloud).
 
 Add an **SSH key** (Lambda Labs gives you an option to create one). Give it a name like `arena_key`.
 
-When you create it, it will automatically be downloaded. The file may have a `.pem` extension — this is a common container format for keys or certificates.
+When you create it, it will automatically be downloaded. The file may have a `.pem` extension - this is a common container format for keys or certificates.
 
 #### VS Code remote-ssh extension
 
@@ -206,7 +206,7 @@ Host arena
 
 Next, open the command palette again and search for "Connect to Host...". When you select this, the host `arena` should appear as one of the hosts - choose this option. A new VS Code window will open up. If you're asked if you want to install the recommended extensions for Python, click yes. If you're asked to choose an OS (Windows, Mac or Linux), choose Linux. When this is done, click on the file explorer icon in the top-left, and open the default directory (this will probably be `ubuntu` or `root`, on which provider you're using).
 
-And there you go — you're all set!
+And there you go - you're all set!
 
 </details>
 
@@ -264,7 +264,7 @@ Click "Deploy" on your chosen machine. A new options menu will open. Do the foll
 
 * You can click on the "Customize Deployment" button, to give yourself more storage (I usually go with 50GB on Container Disk (Temporary) and 50GB on Volume Disk (Persistent). You might be told that there isn't enough capacity when you try to deploy, in which case go back to this menu and make the amount smaller). Click "Set Overrides".
 * In the "Type to search for a template" option, choose the version of PyTorch less than version 2 (this will probably be 1.13.1).
-* Click "Continue", then "Deploy" — this should launch your instance.
+* Click "Continue", then "Deploy" - this should launch your instance.
 
 Once you finish this process, you should see your GPU instance is running, when you navigate to "Pods" on the left hand sidebar:
 
@@ -298,7 +298,7 @@ Host arena
 
 Next, open the command palette again and search for "Connect to Host...". When you select this, the host `arena` should appear as one of the hosts - choose this option. A new VS Code window will open up. If you're asked if you want to install the recommended extensions for Python, click yes. If you're asked to choose an OS (Windows, Mac or Linux), choose Linux. When this is done, click on the file explorer icon in the top-left, and open the default directory (this will probably be `ubuntu` or `root`, on which provider you're using).
 
-And there you go — you're all set!
+And there you go - you're all set!
 
 </details>
 
@@ -395,7 +395,7 @@ Host arena
 
 Next, open the command palette again and search for "Connect to Host...". When you select this, the host `arena` should appear as one of the hosts - choose this option. A new VS Code window will open up. If you're asked if you want to install the recommended extensions for Python, click yes. If you're asked to choose an OS (Windows, Mac or Linux), choose Linux. When this is done, click on the file explorer icon in the top-left, and open the default directory (this will probably be `ubuntu` or `root`, on which provider you're using).
 
-And there you go — you're all set!
+And there you go - you're all set!
 
 </details>
 
