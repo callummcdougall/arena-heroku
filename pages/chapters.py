@@ -18,10 +18,10 @@ CONFIG_URL = (
 )
 
 # Local config path (for development) - relative to this file's location
-# Assumes repo structure: arena-app/ is sibling to arena-pragmatic-interp/
+# Assumes repo structure: arena-app/ is sibling to ARENA_3.0/
 LOCAL_CONFIG_PATHS = [
-    Path(__file__).parent.parent.parent.parent / "arena-pragmatic-interp" / "infrastructure" / "core" / "config.yaml",
-    Path(__file__).parent.parent.parent / "arena-pragmatic-interp" / "infrastructure" / "core" / "config.yaml",
+    Path(__file__).parent.parent.parent.parent / "ARENA_3.0" / "infrastructure" / "core" / "config.yaml",
+    Path(__file__).parent.parent.parent / "ARENA_3.0" / "infrastructure" / "core" / "config.yaml",
 ]
 
 # Cache settings
