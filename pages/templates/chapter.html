@@ -144,7 +144,7 @@
             <!-- Chapter overview when no section selected -->
             <div class="chapter-overview">
                 <h1 class="overview-title">{{ chapter.title }}</h1>
-                <p class="overview-description">{{ chapter.description }}</p>
+                <p class="overview-description">{{ chapter.description|safe }}</p>
 
                 <div class="sections-preview">
                     <h2>Sections</h2>

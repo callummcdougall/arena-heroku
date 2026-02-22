@@ -102,6 +102,7 @@ def _transform_chapter(chapter_id: str, chapter_data: dict) -> dict:
     result = {
         "title": chapter_data.get("title", ""),
         "short_title": chapter_data.get("short_title", ""),
+        "short_description": chapter_data.get("short_description", ""),
         "description": chapter_data.get("description", ""),
         "color": chapter_data.get("color", "#000000"),
         "icon": chapter_data.get("icon", "book"),
