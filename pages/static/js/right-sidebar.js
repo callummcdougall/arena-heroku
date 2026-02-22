@@ -22,7 +22,7 @@
     let chatHelpTooltip = null;
 
     // GitHub raw content base URL
-    const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/callummcdougall/arena-pragmatic-interp/main/';
+    const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/callummcdougall/ARENA_3.0/refs/heads/alignment-science/';
 
     // Cache for file contents and token counts
     // sectionId -> { python: { content, tokens }, markdown: { content, tokens } }
@@ -175,12 +175,7 @@
             document.documentElement.style.setProperty('--right-sidebar-width', savedWidth + 'px');
         }
 
-        const isCollapsed = localStorage.getItem('rightSidebarCollapsed') === 'true';
-        if (isCollapsed) {
-            rightSidebar.classList.add('collapsed');
-            if (rightSidebarToggle) rightSidebarToggle.classList.add('collapsed');
-            document.documentElement.style.setProperty('--right-sidebar-width', '0px');
-        }
+        // Always start expanded on page load (don't restore collapsed state)
     }
 
     /**

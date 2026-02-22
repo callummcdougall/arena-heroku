@@ -35,8 +35,8 @@ def _raw_url(md_path: str) -> str:
     """Construct GitHub raw content URL for a markdown file."""
     owner = os.environ.get("GH_OWNER", "callummcdougall")
     # repo = os.environ.get("GH_REPO", "ARENA_3.0")
-    repo = os.environ.get("GH_REPO", "arena-pragmatic-interp")
-    branch = os.environ.get("GH_BRANCH", "main")
+    repo = os.environ.get("GH_REPO", "ARENA_3.0")
+    branch = os.environ.get("GH_BRANCH", "alignment-science")
     return f"https://raw.githubusercontent.com/{owner}/{repo}/refs/heads/{branch}/{md_path}"
 
 

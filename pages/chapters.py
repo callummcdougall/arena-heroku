@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 # GitHub raw URL for the config file (used in production)
 CONFIG_URL = (
-    "https://raw.githubusercontent.com/callummcdougall/arena-pragmatic-interp/main/infrastructure/core/config.yaml"
+    "https://raw.githubusercontent.com/callummcdougall/ARENA_3.0/alignment-science/infrastructure/core/config.yaml"
 )
 
 # Local config path (for development) - relative to this file's location
