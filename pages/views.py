@@ -1,9 +1,11 @@
+import hashlib
 import html
 import io
 import json
 import logging
 import os
 import re
+import threading
 import uuid
 import zipfile
 from pathlib import Path
@@ -33,6 +35,16 @@ _tiktoken_encoder = tiktoken.get_encoding("cl100k_base")
 
 # Delimiter for sub-sections within a markdown file
 SUBSECTION_DELIMITER = "=== NEW CHAPTER ==="
+
+# Render cache: sha256(raw_text) -> parsed subsections list
+_render_cache: dict[str, list[dict]] = {}
+_render_lock = threading.Lock()
+
+
+def invalidate_render_cache() -> None:
+    """Clear the rendered subsections cache."""
+    with _render_lock:
+        _render_cache.clear()
 
 
 def _raw_url(md_path: str) -> str:
@@ -342,7 +354,17 @@ def _parse_subsections(markdown_text: str) -> list[dict]:
     """
     Parse a markdown file into sub-sections based on the === NEW CHAPTER === delimiter.
     Returns a list of dicts with id, title, markdown, and html for each sub-section.
+
+    Results are cached by sha256(markdown_text) since the render pipeline is
+    deterministic — identical input always produces identical output.
     """
+    cache_key = hashlib.sha256(markdown_text.encode()).hexdigest()
+
+    with _render_lock:
+        cached = _render_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     parts = markdown_text.split(SUBSECTION_DELIMITER)
     subsections = []
 
@@ -372,6 +394,9 @@ def _parse_subsections(markdown_text: str) -> list[dict]:
                 "headers": headers,
             }
         )
+
+    with _render_lock:
+        _render_cache[cache_key] = subsections
 
     return subsections
 
