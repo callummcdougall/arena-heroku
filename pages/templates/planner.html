@@ -429,6 +429,7 @@
         margin-top: 2px;
         max-width: 100%;
         display: -webkit-box;
+        line-clamp: 3;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
@@ -1148,13 +1149,12 @@
         margin-top: 0;
     }
 
-    .planner-help-body ul {
-        margin: var(--spacing-xs) 0;
-        padding-left: var(--spacing-lg);
+    .planner-help-body p {
+        margin: 0 0 var(--spacing-xs) 0;
     }
 
-    .planner-help-body li {
-        margin-bottom: 4px;
+    .planner-help-body p:last-child {
+        margin-bottom: 0;
     }
 
     .planner-help-body code {
@@ -1207,26 +1207,14 @@
     <details class="planner-help">
         <summary>How to use this planner</summary>
         <div class="planner-help-body">
-            <h4>Choosing a study mode</h4>
-            <ul>
-                <li><strong>Full-time</strong> assumes ~8 hours/day across a 5-day week. Pick how many weeks you have (2&ndash;5) and the planner will fit the material accordingly, folding or dropping chapters as needed.</li>
-                <li><strong>Part-time</strong> lets you set your own hours per week and which days you study. The planner calculates how many sessions each section requires and spreads them across your chosen days.</li>
-            </ul>
+            <h4>Study modes</h4>
+            <p><strong>Full-time</strong> assumes ~8 hours/day across a 5-day week. Choose how many weeks you have (2&ndash;5) and the planner fits the material accordingly, folding or dropping chapters as needed. <strong>Part-time</strong> lets you set your own hours per week and which days you study. The planner works out how many sessions each section needs and spreads them across your chosen days.</p>
             <h4>Customising your plan</h4>
-            <ul>
-                <li><strong>Include/exclude chapters</strong> &mdash; use the Chapter 0 and Capstone toggles, or drop chapters (Interp, RL, Evals) to shorten the curriculum.</li>
-                <li><strong>Remove individual sections</strong> &mdash; hover over any section in the schedule and click the <code>&times;</code> button to remove it. Remaining material shifts forward to fill the gap. Removed sections appear in a "Removed sections" area at the bottom where you can click to restore them.</li>
-                <li><strong>"Pick one" slots</strong> &mdash; some days offer a choice between several exercises. There are no hidden dependencies between the options, so pick whatever interests you most.</li>
-            </ul>
-            <h4>Sharing your plan</h4>
-            <ul>
-                <li>Every setting you change is saved in the page URL. Copy the URL from your browser's address bar to share your exact plan with someone else, or bookmark it to return later.</li>
-            </ul>
+            <p>Use the chapter toggles to include or exclude Chapter 0, the Capstone project, or entire chapters (Interp, RL, Evals). You can also remove individual sections by hovering over them in the schedule and clicking the <code>&times;</code> button &mdash; removed sections appear in a list at the bottom of the page where you can restore them. Some days are labelled "Pick one" and offer a choice between several exercises with no hidden dependencies, so just pick whatever interests you.</p>
+            <h4>Sharing &amp; bookmarking</h4>
+            <p>Every setting you change is automatically saved in the page URL. Copy it from your browser's address bar to share your exact plan with someone else, or bookmark it to come back later.</p>
             <h4>Tips</h4>
-            <ul>
-                <li>Toggle <strong>Compressed view</strong> for a quick overview, or turn it off for full descriptions of each section.</li>
-                <li>Don't worry about completing every exercise in a section in one sitting &mdash; each section has enough material for a full day, but even a few hours will give you solid theory takeaways and hands-on practice.</li>
-            </ul>
+            <p>Toggle <strong>Compressed view</strong> for a quick overview table, or keep it off to see full descriptions. Don't worry about finishing every exercise in a section in one sitting &mdash; each section has a full day's worth of material, but even a few hours will give you solid theory and hands-on practice.</p>
         </div>
     </details>
 
