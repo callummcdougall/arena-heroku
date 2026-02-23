@@ -282,6 +282,9 @@ def _render_markdown(text: str) -> str:
     # Pre-process to handle exercise info blocks
     text = _preprocess_exercise_blocks(text)
 
+    # Enable markdown processing inside HTML blockquotes
+    text = text.replace("<blockquote>", '<blockquote markdown="1">')
+
     # Protect LaTeX blocks from markdown processing
     text, latex_placeholders = _protect_latex(text)
 
@@ -294,6 +297,7 @@ def _render_markdown(text: str) -> str:
             "fenced_code",
             "tables",
             "toc",
+            "md_in_html",
         ],
         extension_configs={
             "codehilite": {
