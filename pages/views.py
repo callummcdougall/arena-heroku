@@ -1,6 +1,7 @@
 import html
 import io
 import json
+import logging
 import os
 import re
 import uuid
@@ -20,6 +21,9 @@ from pygments.formatters import HtmlFormatter
 from pygments.lexers import TextLexer, get_lexer_by_name, guess_lexer
 
 from .chapters import get_all_chapters, get_chapter, get_section
+from .github_cache import fetch_github_text
+
+logger = logging.getLogger(__name__)
 
 # Directory for local content files (group overview pages)
 CONTENT_DIR = Path(__file__).parent / "content"
@@ -41,19 +45,17 @@ def _raw_url(md_path: str) -> str:
 
 
 def _fetch_text(url: str) -> str:
-    """Fetch text content from a URL."""
+    """Fetch text content from a GitHub raw URL (with ETag caching)."""
     headers = {}
     token = os.environ.get("GH_TOKEN")
     if token:
         headers["Authorization"] = f"token {token}"
-    print(f"[DEBUG] Fetching URL: {url}")
-    r = requests.get(url, headers=headers, timeout=10)
-    print(f"[DEBUG] Response status: {r.status_code}")
-    if r.status_code == 404:
-        print(f"[DEBUG] 404 Not Found for URL: {url}")
-        raise Http404(f"Content not found: {url}")
-    r.raise_for_status()
-    return r.text
+    try:
+        return fetch_github_text(url, extra_headers=headers)
+    except requests.HTTPError as exc:
+        if exc.response is not None and exc.response.status_code == 404:
+            raise Http404(f"Content not found: {url}") from exc
+        raise
 
 
 def _read_local_content(filename: str) -> str:
@@ -551,18 +553,18 @@ def section_api(request, chapter_id: str, section_id: str):
     try:
         # Check if this is a local content file (group overview) or remote
         if section.get("local_path"):
-            print(f"[DEBUG] Loading local content: {section['local_path']}")
+            logger.debug("Loading local content: %s", section["local_path"])
             text = _read_local_content(section["local_path"])
         else:
             path = section.get("path")
-            print(f"[DEBUG] Section '{section_id}' path: {path}")
+            logger.debug("Section '%s' path: %s", section_id, path)
             if not path:
-                print(f"[DEBUG] WARNING: No 'path' key in section: {section}")
+                logger.warning("No 'path' key in section: %s", section)
                 raise Http404(f"No path configured for section {section_id}")
             text = _fetch_text(_raw_url(path))
         subsections = _parse_subsections(text)
     except Http404 as e:
-        print(f"[DEBUG] Http404 caught: {e}")
+        logger.debug("Http404 caught: %s", e)
         subsections = [
             {
                 "index": 0,
@@ -573,7 +575,7 @@ def section_api(request, chapter_id: str, section_id: str):
             }
         ]
     except requests.RequestException as e:
-        print(f"[DEBUG] RequestException caught: {e}")
+        logger.warning("RequestException caught: %s", e)
         subsections = [
             {
                 "index": 0,
@@ -918,7 +920,7 @@ def download_papers_api(request):
                         zip_file.writestr(filename, text_content.encode("utf-8"))
                 except Exception as e:
                     # Log error but continue with other papers
-                    print(f"Error fetching paper {key}: {e}")
+                    logger.warning("Error fetching paper %s: %s", key, e)
                     continue
 
         zip_buffer.seek(0)
