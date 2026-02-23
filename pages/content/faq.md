@@ -25,3 +25,13 @@ You can study this material in the exact same way as before. There are 3 options
 - **Use VSCode (or your own IDE), working from the exercise notebooks** - this is essentially a hybrid of the first 2 approaches: you can work on your preferred IDE, but complete the exercises by working through `.ipynb` exercise files which are equivalent to the "exercise Colab" notebooks mentioned above. Again, this will require cloning the ARENA_3.0 repo (and we recommend using a remote machine). Each exercise notebook can be found in a path like `chapter1_transformer_interp/exercises/part1_transformer_from_scratch/1.1_Transformer_from_Scratch_exercises.ipynb`
 
 For detailed setup instructions (including how to set up a virtual machine), see the [Setup Instructions](/setup/) page.
+
+---
+
+## How can I contribute to this website?
+
+This website is open source! If you find bugs, want to suggest improvements, or would like to contribute code, visit the [arena-heroku GitHub repository](https://github.com/callummcdougall/arena-heroku).
+
+- **Report issues** - open an issue on GitHub describing the bug or suggestion.
+- **Submit a pull request** - fork the repo, make your changes, and open a PR. We welcome contributions of all kinds: bug fixes, UI improvements, new features, and documentation.
+- **Improve the exercises** - the exercise content itself lives in the [ARENA_3.0 repo](https://github.com/callummcdougall/ARENA_3.0). If you spot errors or want to improve exercise material, contribute there instead.
