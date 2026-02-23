@@ -34,9 +34,8 @@
     --nav-height: 64px;
     --sidebar-width: 280px;
     --right-sidebar-width: 300px;
-    /* Use viewport units so container stays same visual width when zooming */
-    /* Zooming changes font size but not container width, allowing more/less text per line */
-    --content-max-width: 52vw;
+    /* Keep readable line lengths on desktop without collapsing content on tablets/mobiles */
+    --content-max-width: min(100%, clamp(42rem, 52vw, 64rem));
 }
 
 /* Light Theme (default) */
@@ -344,7 +343,7 @@ img {
    -------------------------------------------------------------------------- */
 
 .home-container {
-    max-width: min(1500px, calc(100vw - var(--right-sidebar-width) - 2px));
+    max-width: min(1500px, 96vw);
     margin: 0 auto;
     padding: var(--spacing-2xl) 5%;
 }
@@ -2353,10 +2352,26 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 @media (max-width: 768px) {
     :root {
         --nav-height: 56px;
+        --content-max-width: 100%;
     }
 
     .chapters-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
+    }
+
+    .nav-container {
+        padding: 0 var(--spacing-md);
+    }
+
+    .home-container {
+        max-width: 100%;
+        padding: var(--spacing-xl) var(--spacing-md);
+    }
+
+    .quality-image {
+        width: min(100%, 420px);
+        max-width: 100%;
+        min-width: 0;
     }
 
     .chapter-layout {
@@ -2402,7 +2417,7 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     }
 
     .chapter-content {
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
     }
 
     .content-nav {
@@ -2415,6 +2430,13 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 
     .hero-logo {
         height: 60px;
+    }
+
+    .faq-container,
+    .static-page-container {
+        max-width: 100%;
+        padding-left: var(--spacing-md);
+        padding-right: var(--spacing-md);
     }
 }
 
