@@ -710,8 +710,16 @@
         align-items: center;
     }
 
-    .pick-carousel-arrows-viewport {
+    .pick-carousel-arrows-row {
+        display: flex;
+        align-items: center;
+        gap: 4px;
         width: 100%;
+    }
+
+    .pick-carousel-arrows-viewport {
+        flex: 1;
+        min-width: 0;
         overflow: hidden;
     }
 
@@ -724,16 +732,9 @@
         text-decoration: none;
     }
 
-    .pick-arrows-nav {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        margin-top: 4px;
-    }
-
     .pick-arrows-btn {
-        width: 18px;
-        height: 18px;
+        width: 22px;
+        height: 22px;
         border: 1px solid var(--color-border);
         border-radius: 50%;
         background: var(--color-surface);
@@ -745,6 +746,7 @@
         color: var(--color-text-muted);
         font-size: 10px;
         line-height: 1;
+        flex-shrink: 0;
         transition: all var(--transition-fast);
     }
 
@@ -758,6 +760,8 @@
         color: var(--color-text-muted);
         font-family: var(--font-heading);
         font-weight: 600;
+        text-align: center;
+        margin-top: 2px;
     }
 
     .pick-carousel-label {
@@ -822,6 +826,345 @@
         display: none;
     }
 
+    /* ===== Mode-specific option wrappers ===== */
+    #ft-options,
+    #pt-options {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    /* ===== Part-Time Controls ===== */
+    .pt-slider-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .pt-slider-row {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+    .pt-slider-row input[type="range"] {
+        flex: 1;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 6px;
+        background: var(--color-border);
+        border-radius: 3px;
+        outline: none;
+        cursor: pointer;
+    }
+
+    .pt-slider-row input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        cursor: pointer;
+        border: 2px solid var(--color-surface);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .pt-slider-row input[type="range"]::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        cursor: pointer;
+        border: 2px solid var(--color-surface);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .pt-slider-value {
+        font-family: var(--font-heading);
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        min-width: 48px;
+        text-align: right;
+    }
+
+    .pt-days-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
+    }
+
+    .pt-day-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 0.8125rem;
+        color: var(--color-text-secondary);
+        transition: all var(--transition-fast);
+        user-select: none;
+    }
+
+    .pt-day-checkbox:hover {
+        background: var(--color-surface-hover);
+        color: var(--color-text);
+    }
+
+    .pt-day-checkbox input[type="checkbox"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--color-text-muted);
+        border-radius: 3px;
+        background: var(--color-surface);
+        cursor: pointer;
+        position: relative;
+        flex-shrink: 0;
+        transition: all var(--transition-fast);
+    }
+
+    .pt-day-checkbox input[type="checkbox"]:checked {
+        border-color: var(--color-primary);
+        background: var(--color-surface);
+    }
+
+    .pt-day-checkbox input[type="checkbox"]:checked::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        bottom: 2px;
+        background: var(--color-primary);
+        border-radius: 1px;
+    }
+
+    .pt-summary {
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: var(--color-bg-tertiary);
+        border-left: 4px solid var(--color-primary);
+        border-radius: var(--radius-md);
+        font-size: 0.8125rem;
+        color: var(--color-text-secondary);
+        line-height: 1.6;
+    }
+
+    .pt-summary strong {
+        color: var(--color-text);
+        font-weight: 600;
+    }
+
+    /* ===== Remove (X) Button ===== */
+    .cell-remove-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 20px;
+        height: 20px;
+        border: 1px solid var(--color-border);
+        border-radius: 50%;
+        background: var(--color-surface);
+        color: var(--color-text-muted);
+        font-size: 12px;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        opacity: 0;
+        transition: all var(--transition-fast);
+        z-index: 10;
+    }
+
+    .day-card:hover .cell-remove-btn,
+    .compressed-cell:hover .cell-remove-btn,
+    .pick-group:hover > .cell-remove-btn {
+        opacity: 1;
+    }
+
+    .cell-remove-btn:hover {
+        background: #DC2626;
+        border-color: #DC2626;
+        color: white;
+    }
+
+    /* Make day-card position relative for the X button */
+    .compressed-cell {
+        position: relative;
+    }
+
+    /* ===== Reject Pile ===== */
+    .reject-pile {
+        margin-top: var(--spacing-xl);
+        padding: var(--spacing-lg);
+        background: var(--color-bg-secondary);
+        border: 1px dashed var(--color-border);
+        border-radius: var(--radius-lg);
+    }
+
+    .reject-pile-title {
+        font-family: var(--font-heading);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--color-text-muted);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .reject-pile-subtitle {
+        font-size: 0.8125rem;
+        color: var(--color-text-muted);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .reject-pile-items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+    }
+
+    .reject-pile-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        font-size: 0.8125rem;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+
+    .reject-pile-item:hover {
+        border-color: var(--color-primary);
+        background: var(--color-surface-hover);
+        color: var(--color-text);
+    }
+
+    .reject-pile-item-num {
+        font-family: var(--font-heading);
+        font-weight: 600;
+        color: var(--color-primary);
+        font-size: 0.75rem;
+    }
+
+    .reject-pile-item-plus {
+        color: var(--color-primary);
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+
+    .pt-continued-badge {
+        display: inline-block;
+        font-size: 0.625rem;
+        font-weight: 600;
+        color: var(--color-text-muted);
+        background: var(--color-bg-tertiary);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        padding: 1px 6px;
+        margin-left: var(--spacing-xs);
+        vertical-align: middle;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    /* ===== Help Panel ===== */
+    .planner-help {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .planner-help summary {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: var(--color-bg-secondary);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-family: var(--font-heading);
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-text-secondary);
+        transition: all var(--transition-fast);
+        list-style: none;
+        user-select: none;
+    }
+
+    .planner-help summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .planner-help summary::before {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-right: 2px solid var(--color-text-muted);
+        border-bottom: 2px solid var(--color-text-muted);
+        transform: rotate(-45deg);
+        transition: transform 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .planner-help[open] summary::before {
+        transform: rotate(45deg);
+    }
+
+    .planner-help summary:hover {
+        background: var(--color-surface-hover);
+        color: var(--color-text);
+        border-color: var(--color-text-muted);
+    }
+
+    .planner-help-body {
+        padding: var(--spacing-md) var(--spacing-lg);
+        margin-top: var(--spacing-xs);
+        background: var(--color-bg-secondary);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        font-size: 0.8125rem;
+        color: var(--color-text-secondary);
+        line-height: 1.7;
+    }
+
+    .planner-help-body h4 {
+        font-family: var(--font-heading);
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-top: var(--spacing-md);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .planner-help-body h4:first-child {
+        margin-top: 0;
+    }
+
+    .planner-help-body ul {
+        margin: var(--spacing-xs) 0;
+        padding-left: var(--spacing-lg);
+    }
+
+    .planner-help-body li {
+        margin-bottom: 4px;
+    }
+
+    .planner-help-body code {
+        font-size: 0.75rem;
+        background: var(--color-bg-tertiary);
+        padding: 1px 5px;
+        border-radius: 3px;
+        color: var(--color-text);
+    }
+
     /* ===== Responsive ===== */
     @media (max-width: 768px) {
         .planner-container {
@@ -843,6 +1186,15 @@
             align-items: flex-start;
             gap: var(--spacing-xs);
         }
+
+        .pt-days-grid {
+            gap: 4px;
+        }
+
+        .pt-day-checkbox {
+            padding: 4px 6px;
+            font-size: 0.75rem;
+        }
     }
 </style>
 {% endblock %}
@@ -852,18 +1204,83 @@
     <h1 class="planner-title">Course Planner</h1>
     <p class="planner-subtitle">Configure your ARENA program schedule based on your available time. The planner will generate a week-by-week daily schedule with the right exercises for you.</p>
 
+    <details class="planner-help">
+        <summary>How to use this planner</summary>
+        <div class="planner-help-body">
+            <h4>Choosing a study mode</h4>
+            <ul>
+                <li><strong>Full-time</strong> assumes ~8 hours/day across a 5-day week. Pick how many weeks you have (2&ndash;5) and the planner will fit the material accordingly, folding or dropping chapters as needed.</li>
+                <li><strong>Part-time</strong> lets you set your own hours per week and which days you study. The planner calculates how many sessions each section requires and spreads them across your chosen days.</li>
+            </ul>
+            <h4>Customising your plan</h4>
+            <ul>
+                <li><strong>Include/exclude chapters</strong> &mdash; use the Chapter 0 and Capstone toggles, or drop chapters (Interp, RL, Evals) to shorten the curriculum.</li>
+                <li><strong>Remove individual sections</strong> &mdash; hover over any section in the schedule and click the <code>&times;</code> button to remove it. Remaining material shifts forward to fill the gap. Removed sections appear in a "Removed sections" area at the bottom where you can click to restore them.</li>
+                <li><strong>"Pick one" slots</strong> &mdash; some days offer a choice between several exercises. There are no hidden dependencies between the options, so pick whatever interests you most.</li>
+            </ul>
+            <h4>Sharing your plan</h4>
+            <ul>
+                <li>Every setting you change is saved in the page URL. Copy the URL from your browser's address bar to share your exact plan with someone else, or bookmark it to return later.</li>
+            </ul>
+            <h4>Tips</h4>
+            <ul>
+                <li>Toggle <strong>Compressed view</strong> for a quick overview, or turn it off for full descriptions of each section.</li>
+                <li>Don't worry about completing every exercise in a section in one sitting &mdash; each section has enough material for a full day, but even a few hours will give you solid theory takeaways and hands-on practice.</li>
+            </ul>
+        </div>
+    </details>
+
     <!-- Options Panel -->
     <div class="planner-options">
+        <!-- Mode toggle: Full-time / Part-time -->
         <div class="option-group">
-            <label class="option-label">How many weeks do you have?</label>
-            <div class="option-buttons" id="weeks-selector">
-                <button class="option-btn" data-value="2">2 weeks</button>
-                <button class="option-btn" data-value="3">3 weeks</button>
-                <button class="option-btn" data-value="4">4 weeks</button>
-                <button class="option-btn active" data-value="5">5 weeks</button>
+            <label class="option-label">Study mode</label>
+            <div class="option-buttons" id="mode-selector">
+                <button class="option-btn active" data-value="full-time">Full-time</button>
+                <button class="option-btn" data-value="part-time">Part-time</button>
             </div>
         </div>
 
+        <!-- Full-time specific controls -->
+        <div id="ft-options">
+            <div class="option-group">
+                <label class="option-label">How many weeks do you have?</label>
+                <div class="option-buttons" id="weeks-selector">
+                    <button class="option-btn" data-value="2">2 weeks</button>
+                    <button class="option-btn" data-value="3">3 weeks</button>
+                    <button class="option-btn" data-value="4">4 weeks</button>
+                    <button class="option-btn active" data-value="5">5 weeks</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part-time specific controls -->
+        <div id="pt-options" style="display: none;">
+            <div class="option-group pt-slider-group">
+                <label class="option-label">How many hours per week can you study?</label>
+                <div class="pt-slider-row">
+                    <input type="range" id="pt-hours-slider" min="5" max="40" value="15" step="1">
+                    <span class="pt-slider-value" id="pt-hours-value">15 h/wk</span>
+                </div>
+            </div>
+
+            <div class="option-group">
+                <label class="option-label">Which days will you study?</label>
+                <div class="pt-days-grid" id="pt-days-grid">
+                    <label class="pt-day-checkbox"><input type="checkbox" value="mon" checked><span>Mon</span></label>
+                    <label class="pt-day-checkbox"><input type="checkbox" value="tue" checked><span>Tue</span></label>
+                    <label class="pt-day-checkbox"><input type="checkbox" value="wed" checked><span>Wed</span></label>
+                    <label class="pt-day-checkbox"><input type="checkbox" value="thu" checked><span>Thu</span></label>
+                    <label class="pt-day-checkbox"><input type="checkbox" value="fri" checked><span>Fri</span></label>
+                    <label class="pt-day-checkbox"><input type="checkbox" value="sat"><span>Sat</span></label>
+                    <label class="pt-day-checkbox"><input type="checkbox" value="sun"><span>Sun</span></label>
+                </div>
+            </div>
+
+            <div class="pt-summary" id="pt-summary"></div>
+        </div>
+
+        <!-- Shared controls -->
         <div class="option-checkboxes">
             <label class="option-checkbox" id="ch0-toggle">
                 <input type="checkbox" id="ch0-checkbox" checked>
@@ -913,6 +1330,13 @@
 
     <!-- Explanatory text -->
     <div class="planner-explanation" id="planner-explanation"></div>
+
+    <!-- Reject pile (removed sections) -->
+    <div class="reject-pile" id="reject-pile" style="display: none;">
+        <h3 class="reject-pile-title">Removed sections</h3>
+        <p class="reject-pile-subtitle">Click a section to add it back to your plan.</p>
+        <div class="reject-pile-items" id="reject-pile-items"></div>
+    </div>
 </div>
 
 <script>
@@ -999,10 +1423,10 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
             description: "A whirlwind tour through RL, from tabular learning and Atari to cutting-edge LLM post-training techniques.",
             days: [
                 { type: "fixed", section: "2.1" },
-                { type: "fixed", section: "2.2.1" },
-                { type: "fixed", section: "2.2.2" },
+                { type: "fixed", section: "2.2" },
                 { type: "fixed", section: "2.3" },
                 { type: "fixed", section: "2.4" },
+                { type: "bonus", label: "Bonus RL material" },
             ]
         },
 
@@ -1014,7 +1438,7 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
             days: [
                 { type: "fixed", section: "1.1" },
                 { type: "fixed", section: "2.1" },
-                { type: "fixed_double", number: "2.2", title: "DQNs + VPG", sections: ["2.2.1", "2.2.2"] },
+                { type: "fixed", section: "2.2" },
                 { type: "fixed", section: "2.3" },
                 { type: "fixed", section: "2.4" },
             ]
@@ -1153,16 +1577,186 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
         return weeks;
     }
 
+    // ===== Part-time plan generation =====
+    var HOURS_PER_SECTION = 8;
+
+    // Map of which chapter templates supply the section ordering for part-time.
+    // We use the "full" templates (no folding) since part-time lays everything out linearly.
+    var PT_CHAPTER_TEMPLATES = {
+        ch0: WEEK_TEMPLATES.ch0,
+        ch1: WEEK_TEMPLATES.ch1_full,
+        ch2: WEEK_TEMPLATES.ch2_full,
+        ch3: WEEK_TEMPLATES.ch3_full,
+        ch4: WEEK_TEMPLATES.ch4_full,
+    };
+
+    var DAY_NAME_MAP = {
+        mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu',
+        fri: 'Fri', sat: 'Sat', sun: 'Sun'
+    };
+
+    function getPartTimeStats() {
+        var sessionsPerWeek = state.studyDays.length;
+        var hoursPerSession = state.hoursPerWeek / sessionsPerWeek;
+        var sessionsPerSection = Math.max(1, Math.ceil(HOURS_PER_SECTION / hoursPerSession));
+        return {
+            sessionsPerWeek: sessionsPerWeek,
+            hoursPerSession: hoursPerSession,
+            sessionsPerSection: sessionsPerSection,
+        };
+    }
+
+    function buildPartTimeSessions(includeCh0, includeCapstone, droppedChapters, sessionsPerSection) {
+        // Build a flat list of session slots from the included chapter templates
+        var sessions = [];
+
+        var chapterOrder = [];
+        if (includeCh0) chapterOrder.push('ch0');
+        if (!droppedChapters.has('interp')) chapterOrder.push('ch1');
+        if (!droppedChapters.has('rl')) chapterOrder.push('ch2');
+        if (!droppedChapters.has('evals')) chapterOrder.push('ch3');
+        chapterOrder.push('ch4');
+
+        for (var ci = 0; ci < chapterOrder.length; ci++) {
+            var tmpl = PT_CHAPTER_TEMPLATES[chapterOrder[ci]];
+            for (var di = 0; di < tmpl.days.length; di++) {
+                var day = tmpl.days[di];
+                if (day.type === 'fixed') {
+                    for (var s = 0; s < sessionsPerSection; s++) {
+                        sessions.push({
+                            type: 'fixed',
+                            section: day.section,
+                            continued: s > 0,
+                            chapterColor: tmpl.color,
+                            chapterTitle: tmpl.title,
+                            chapterIdx: tmpl.chapterIdx,
+                        });
+                    }
+                } else if (day.type === 'fixed_double') {
+                    for (var s2 = 0; s2 < sessionsPerSection; s2++) {
+                        sessions.push({
+                            type: 'fixed_double',
+                            number: day.number,
+                            title: day.title,
+                            sections: day.sections,
+                            continued: s2 > 0,
+                            chapterColor: tmpl.color,
+                            chapterTitle: tmpl.title,
+                            chapterIdx: tmpl.chapterIdx,
+                        });
+                    }
+                } else if (day.type === 'pick') {
+                    for (var s3 = 0; s3 < sessionsPerSection; s3++) {
+                        sessions.push({
+                            type: 'pick',
+                            options: day.options,
+                            groupLabel: day.groupLabel,
+                            continued: s3 > 0,
+                            chapterColor: tmpl.color,
+                            chapterTitle: tmpl.title,
+                            chapterIdx: tmpl.chapterIdx,
+                        });
+                    }
+                } else if (day.type === 'bonus') {
+                    sessions.push({
+                        type: 'bonus',
+                        label: day.label,
+                        continued: false,
+                        chapterColor: tmpl.color,
+                        chapterTitle: tmpl.title,
+                        chapterIdx: tmpl.chapterIdx,
+                    });
+                }
+            }
+        }
+
+        return sessions;
+    }
+
+    function generatePartTimePlan() {
+        var stats = getPartTimeStats();
+        var sessions = buildPartTimeSessions(
+            state.includeCh0, state.includeCapstone, state.droppedChapters, stats.sessionsPerSection
+        );
+
+        // Filter out removed sections
+        if (state.removedSections.length > 0) {
+            var removedSet = {};
+            state.removedSections.forEach(function(s) { removedSet[s] = true; });
+            sessions = sessions.filter(function(sess) {
+                if (sess.type === 'fixed' && removedSet[sess.section]) return false;
+                if (sess.type === 'fixed_double') {
+                    // Remove if all sub-sections are removed
+                    var allRemoved = true;
+                    sess.sections.forEach(function(s) { if (!removedSet[s]) allRemoved = false; });
+                    if (allRemoved) return false;
+                }
+                return true;
+            });
+        }
+
+        var totalSessions = sessions.length;
+        var numWeeks = Math.ceil(totalSessions / stats.sessionsPerWeek);
+
+        // Add capstone sessions at the end
+        if (state.includeCapstone) {
+            for (var cs = 0; cs < stats.sessionsPerWeek; cs++) {
+                sessions.push({
+                    type: 'capstone',
+                    continued: false,
+                    chapterColor: '#7C3AED',
+                    chapterTitle: 'Capstone Project',
+                });
+            }
+            numWeeks = Math.ceil(sessions.length / stats.sessionsPerWeek);
+        }
+
+        // Group into weeks
+        var weeks = [];
+        for (var w = 0; w < numWeeks; w++) {
+            var weekSessions = [];
+            for (var d = 0; d < stats.sessionsPerWeek; d++) {
+                var idx = w * stats.sessionsPerWeek + d;
+                if (idx < sessions.length) {
+                    var sess = sessions[idx];
+                    sess.dayLabel = DAY_NAME_MAP[state.studyDays[d]] || state.studyDays[d];
+                    weekSessions.push(sess);
+                }
+            }
+            if (weekSessions.length > 0) {
+                weeks.push({
+                    weekNum: w + 1,
+                    color: weekSessions[0].chapterColor,
+                    chapterTitle: weekSessions[0].chapterTitle,
+                    chapterIdx: weekSessions[0].chapterIdx,
+                    sessions: weekSessions,
+                });
+            }
+        }
+
+        return { weeks: weeks, totalSessions: totalSessions, stats: stats };
+    }
+
     // ===== State =====
     var state = {
+        mode: 'full-time',
+        // Full-time state
         numWeeks: 5,
+        // Shared state
         includeCh0: true,
         includeCapstone: false,
         droppedChapters: new Set(),
         compressed: true,
+        // Part-time state
+        hoursPerWeek: 15,
+        studyDays: ['mon', 'tue', 'wed', 'thu', 'fri'],
+        removedSections: [], // section numbers removed by user via X button
     };
 
     // ===== DOM refs =====
+    var modeBtns = document.querySelectorAll('#mode-selector .option-btn');
+    var ftOptions = document.getElementById('ft-options');
+    var ptOptions = document.getElementById('pt-options');
     var weeksBtns = document.querySelectorAll('#weeks-selector .option-btn');
     var ch0Checkbox = document.getElementById('ch0-checkbox');
     var capstoneCheckbox = document.getElementById('capstone-checkbox');
@@ -1174,6 +1768,14 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
     var plannerWeeksEl = document.getElementById('planner-weeks');
     var compressedToggle = document.getElementById('compressed-toggle');
     var explanationEl = document.getElementById('planner-explanation');
+    // Part-time DOM refs
+    var ptHoursSlider = document.getElementById('pt-hours-slider');
+    var ptHoursValue = document.getElementById('pt-hours-value');
+    var ptDaysGrid = document.getElementById('pt-days-grid');
+    var ptDayCheckboxes = document.querySelectorAll('#pt-days-grid input[type="checkbox"]');
+    var ptSummary = document.getElementById('pt-summary');
+    var rejectPileEl = document.getElementById('reject-pile');
+    var rejectPileItems = document.getElementById('reject-pile-items');
 
     // ===== Button group behavior =====
     function setupButtonGroup(buttons, callback) {
@@ -1201,6 +1803,20 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
         }
     }
 
+    // ===== Mode toggle =====
+    setupButtonGroup(modeBtns, function(val) {
+        state.mode = val;
+        ftOptions.style.display = val === 'full-time' ? '' : 'none';
+        ptOptions.style.display = val === 'part-time' ? '' : 'none';
+        // Reset drops when switching modes
+        state.droppedChapters.clear();
+        dropCheckboxes.forEach(function(cb) { cb.checked = false; });
+        if (val === 'full-time') {
+            applyDefaultDrops();
+        }
+        updateUI();
+    });
+
     setupButtonGroup(weeksBtns, function(val) {
         state.numWeeks = parseInt(val, 10);
         applyDefaultDrops();
@@ -1209,7 +1825,9 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
 
     ch0Checkbox.addEventListener('change', function() {
         state.includeCh0 = ch0Checkbox.checked;
-        applyDefaultDrops();
+        if (state.mode === 'full-time') {
+            applyDefaultDrops();
+        }
         updateUI();
     });
 
@@ -1223,8 +1841,39 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
         updateUI();
     });
 
+    // ===== Part-time event listeners =====
+    ptHoursSlider.addEventListener('input', function() {
+        state.hoursPerWeek = parseInt(ptHoursSlider.value, 10);
+        ptHoursValue.textContent = state.hoursPerWeek + ' h/wk';
+        updateUI();
+    });
+
+    ptDayCheckboxes.forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            var selected = [];
+            ptDayCheckboxes.forEach(function(d) { if (d.checked) selected.push(d.value); });
+            // Enforce at least 1 day
+            if (selected.length === 0) {
+                cb.checked = true;
+                return;
+            }
+            state.studyDays = selected;
+            updateUI();
+        });
+    });
+
     dropCheckboxes.forEach(function(cb) {
         cb.addEventListener('change', function() {
+            if (state.mode === 'part-time') {
+                // Part-time: just toggle the drop and recalculate
+                if (cb.checked) {
+                    state.droppedChapters.add(cb.value);
+                } else {
+                    state.droppedChapters.delete(cb.value);
+                }
+                updateUI();
+                return;
+            }
             if (cb.checked) {
                 state.droppedChapters.add(cb.value);
                 // If we now have more drops than needed, reduce weeks
@@ -1331,8 +1980,61 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
         return mainText ? mainText + '\n\n' + pickNote : pickNote;
     }
 
+    function generatePartTimeExplanation(result) {
+        var stats = result.stats;
+        var parts = [];
+
+        // Count included sections
+        var totalSections = 0;
+        var chapterOrder = [];
+        if (state.includeCh0) chapterOrder.push('ch0');
+        if (!state.droppedChapters.has('interp')) chapterOrder.push('ch1');
+        if (!state.droppedChapters.has('rl')) chapterOrder.push('ch2');
+        if (!state.droppedChapters.has('evals')) chapterOrder.push('ch3');
+        chapterOrder.push('ch4');
+        for (var i = 0; i < chapterOrder.length; i++) {
+            totalSections += PT_CHAPTER_TEMPLATES[chapterOrder[i]].days.length;
+        }
+        var totalHours = totalSections * HOURS_PER_SECTION;
+
+        parts.push('The selected ARENA material has ' + totalSections + ' sections (~' + totalHours + ' hours of content).');
+        parts.push('At ' + state.hoursPerWeek + ' hours/week across ' + state.studyDays.length + ' study day' + (state.studyDays.length === 1 ? '' : 's') + ', each session is ~' + stats.hoursPerSession.toFixed(1) + ' hours.');
+
+        if (stats.sessionsPerSection > 1) {
+            parts.push('Each section takes ' + stats.sessionsPerSection + ' sessions to complete, so continued sessions are marked with a "(cont\'d)" badge.');
+        }
+
+        var numWeeks = result.weeks.length;
+        parts.push('Your plan spans ' + numWeeks + ' week' + (numWeeks === 1 ? '' : 's') + '.');
+
+        if (state.droppedChapters.size > 0) {
+            var droppedNames = [];
+            var CHAPTER_NAMES = { interp: 'Interpretability', rl: 'Reinforcement Learning', evals: 'Evaluations' };
+            state.droppedChapters.forEach(function(ch) {
+                droppedNames.push(CHAPTER_NAMES[ch] || ch);
+            });
+            parts.push((droppedNames.length === 1 ? droppedNames[0] + ' has' : droppedNames.join(' and ') + ' have') + ' been dropped to fit the schedule.');
+        }
+
+        if (state.includeCapstone) {
+            parts.push('The final week is reserved for your capstone project.');
+        }
+
+        var mainText = parts.join(' ');
+        var pickNote = 'Some sessions have prescribed material, while others let you choose freely - there are no hidden dependencies between the options, so pick whatever interests you most.';
+        return mainText + '\n\n' + pickNote;
+    }
+
     // ===== UI update =====
     function updateUI() {
+        if (state.mode === 'part-time') {
+            updatePartTimeUI();
+            return;
+        }
+
+        // === Full-time UI ===
+        surplusMessage.style.display = 'none';
+
         var weeksNeeded = 4 + (state.includeCh0 ? 1 : 0);
         var deficit = weeksNeeded - state.numWeeks;
         var dropsNeeded = Math.max(0, deficit - 1);
@@ -1381,14 +2083,68 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
         }
 
         var weeks = generatePlan(state.numWeeks, state.includeCh0, state.includeCapstone, state.droppedChapters);
+
+        // Filter out removed sections from full-time plan
+        if (state.removedSections.length > 0) {
+            var removedSet = {};
+            state.removedSections.forEach(function(s) { removedSet[s] = true; });
+            weeks = weeks.map(function(week) {
+                if (week.isCapstone) return week;
+                var filteredDays = week.days.filter(function(day) {
+                    if (day.type === 'fixed' && removedSet[day.section]) return false;
+                    if (day.type === 'fixed_double') {
+                        var allRemoved = true;
+                        day.sections.forEach(function(s) { if (!removedSet[s]) allRemoved = false; });
+                        if (allRemoved) return false;
+                    }
+                    return true;
+                });
+                return { title: week.title, color: week.color, chapterIdx: week.chapterIdx, description: week.description, days: filteredDays, isCapstone: week.isCapstone };
+            }).filter(function(week) {
+                return week.isCapstone || week.days.length > 0;
+            });
+        }
+
         if (state.compressed) {
             renderCompressedTable(weeks);
         } else {
             renderWeeks(weeks);
         }
 
+        // Render reject pile
+        renderRejectPile();
+
         // Update explanation text
         explanationEl.textContent = generateExplanation();
+    }
+
+    function updatePartTimeUI() {
+        // Generate plan
+        var result = generatePartTimePlan();
+
+        // Update summary
+        var stats = result.stats;
+        ptSummary.innerHTML = '<strong>' + stats.sessionsPerWeek + '</strong> session' + (stats.sessionsPerWeek === 1 ? '' : 's') + '/week' +
+            ' &middot; <strong>~' + stats.hoursPerSession.toFixed(1) + '</strong> hours/session' +
+            ' &middot; <strong>' + stats.sessionsPerSection + '</strong> session' + (stats.sessionsPerSection === 1 ? '' : 's') + '/section' +
+            ' &middot; Plan spans <strong>' + result.weeks.length + '</strong> week' + (result.weeks.length === 1 ? '' : 's');
+
+        // Hide full-time specific UI
+        dropGroup.style.display = 'none';
+        surplusMessage.style.display = 'none';
+
+        // Render the part-time schedule
+        if (state.compressed) {
+            renderPartTimeTable(result);
+        } else {
+            renderPartTimeList(result);
+        }
+
+        // Render reject pile
+        renderRejectPile();
+
+        // Explanation
+        explanationEl.textContent = generatePartTimeExplanation(result);
     }
 
     // ===== Rendering =====
@@ -1449,6 +2205,14 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
                             td.appendChild(renderCompressedPickCellDOM(day.options, day.groupLabel));
                         } else {
                             td.innerHTML = renderCompressedCell(day, week.color);
+                        }
+                        // Add X button for removable sections
+                        if (day.type === 'fixed') {
+                            td.appendChild(createRemoveBtn(day.section));
+                        } else if (day.type === 'fixed_double' && day.sections) {
+                            td.appendChild(createRemoveBtn(day.sections[0]));
+                        } else if (day.type === 'pick' && day.options) {
+                            td.appendChild(createRemoveBtnMulti(day.options));
                         }
                     }
                     tr.appendChild(td);
@@ -1541,6 +2305,9 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
 
         var currentIdx = 0;
 
+        var counter = document.createElement('span');
+        counter.className = 'pick-arrows-counter';
+
         var viewport = document.createElement('div');
         viewport.className = 'pick-carousel-arrows-viewport';
 
@@ -1562,12 +2329,7 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
             counter.textContent = (currentIdx + 1) + '/' + sections.length;
         }
 
-        wrapper.appendChild(viewport);
-
-        // Nav row
-        var nav = document.createElement('div');
-        nav.className = 'pick-arrows-nav';
-
+        // Arrows flanking the viewport in a horizontal row
         var leftBtn = document.createElement('button');
         leftBtn.className = 'pick-arrows-btn';
         leftBtn.innerHTML = '\u25C0';
@@ -1577,9 +2339,6 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
             currentIdx = (currentIdx - 1 + sections.length) % sections.length;
             renderCurrent();
         });
-
-        var counter = document.createElement('span');
-        counter.className = 'pick-arrows-counter';
 
         var rightBtn = document.createElement('button');
         rightBtn.className = 'pick-arrows-btn';
@@ -1591,12 +2350,17 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
             renderCurrent();
         });
 
-        nav.appendChild(leftBtn);
-        nav.appendChild(counter);
-        nav.appendChild(rightBtn);
-        wrapper.appendChild(nav);
+        var arrowRow = document.createElement('div');
+        arrowRow.className = 'pick-carousel-arrows-row';
+        arrowRow.appendChild(leftBtn);
+        arrowRow.appendChild(viewport);
+        arrowRow.appendChild(rightBtn);
+        wrapper.appendChild(arrowRow);
 
-        // Label below arrows
+        // Counter below
+        wrapper.appendChild(counter);
+
+        // Label below counter
         if (groupLabel) {
             var label = document.createElement('div');
             label.className = 'pick-carousel-label';
@@ -1699,13 +2463,19 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
 
         switch (day.type) {
             case 'fixed':
-                content.appendChild(renderFixedCard(day.section));
+                var fixedCard = renderFixedCard(day.section);
+                fixedCard.appendChild(createRemoveBtn(day.section));
+                content.appendChild(fixedCard);
                 break;
             case 'fixed_double':
-                content.appendChild(renderFixedDoubleCard(day));
+                var dblCard = renderFixedDoubleCard(day);
+                dblCard.appendChild(createRemoveBtn(day.sections[0]));
+                content.appendChild(dblCard);
                 break;
             case 'pick':
-                content.appendChild(renderPickGroup(day.options, day.groupLabel));
+                var pickGroup = renderPickGroup(day.options, day.groupLabel);
+                pickGroup.appendChild(createRemoveBtnMulti(day.options));
+                content.appendChild(pickGroup);
                 break;
             case 'bonus':
                 var bonus = document.createElement('div');
@@ -1856,6 +2626,273 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
         return group;
     }
 
+    // ---- Part-time list rendering ----
+    function renderPartTimeList(result) {
+        plannerWeeksEl.innerHTML = '';
+
+        result.weeks.forEach(function(week) {
+            var weekEl = document.createElement('div');
+            weekEl.className = 'week-card';
+            weekEl.style.setProperty('--week-color', week.color);
+
+            // Header
+            var header = document.createElement('div');
+            header.className = 'week-header';
+
+            var headerImgSrc = (week.chapterIdx !== undefined) ? CHAPTER_IMAGE[week.chapterIdx] : '';
+            if (headerImgSrc) {
+                var hImg = document.createElement('img');
+                hImg.className = 'week-header-image';
+                hImg.src = headerImgSrc;
+                hImg.alt = '';
+                hImg.loading = 'lazy';
+                header.appendChild(hImg);
+            } else {
+                var hPlaceholder = document.createElement('div');
+                hPlaceholder.className = 'week-header-image-placeholder';
+                header.appendChild(hPlaceholder);
+            }
+
+            var headerText = document.createElement('div');
+            headerText.className = 'week-header-text';
+            var headerTop = document.createElement('div');
+            headerTop.className = 'week-header-top';
+            var numEl = document.createElement('div');
+            numEl.className = 'week-number';
+            numEl.textContent = 'Week ' + week.weekNum;
+            headerTop.appendChild(numEl);
+            var titleEl = document.createElement('div');
+            titleEl.className = 'week-title';
+            titleEl.textContent = week.chapterTitle || '';
+            headerTop.appendChild(titleEl);
+            headerText.appendChild(headerTop);
+            header.appendChild(headerText);
+            weekEl.appendChild(header);
+
+            // Sessions
+            var daysContainer = document.createElement('div');
+            daysContainer.className = 'week-days';
+
+            week.sessions.forEach(function(sess, sessIdx) {
+                var row = document.createElement('div');
+                row.className = 'day-row';
+
+                var labelEl = document.createElement('div');
+                labelEl.className = 'day-label';
+                labelEl.textContent = sess.dayLabel;
+                row.appendChild(labelEl);
+
+                var content = document.createElement('div');
+                content.className = 'day-content';
+
+                if (sess.type === 'capstone') {
+                    var capMsg = document.createElement('div');
+                    capMsg.className = 'day-card day-card-bonus';
+                    capMsg.innerHTML = '<span class="day-card-title">Capstone project</span>';
+                    content.appendChild(capMsg);
+                } else if (sess.type === 'fixed') {
+                    var card = renderFixedCard(sess.section);
+                    if (sess.continued) {
+                        var badge = document.createElement('span');
+                        badge.className = 'pt-continued-badge';
+                        badge.textContent = "cont'd";
+                        card.appendChild(badge);
+                    }
+                    card.appendChild(createRemoveBtn(sess.section));
+                    content.appendChild(card);
+                } else if (sess.type === 'fixed_double') {
+                    var dblCard = renderFixedDoubleCard(sess);
+                    if (sess.continued) {
+                        var badge2 = document.createElement('span');
+                        badge2.className = 'pt-continued-badge';
+                        badge2.textContent = "cont'd";
+                        dblCard.appendChild(badge2);
+                    }
+                    dblCard.appendChild(createRemoveBtn(sess.sections[0]));
+                    content.appendChild(dblCard);
+                } else if (sess.type === 'pick') {
+                    var pickEl = renderPickGroup(sess.options, sess.groupLabel);
+                    if (sess.continued) {
+                        var pickBadge = document.createElement('span');
+                        pickBadge.className = 'pt-continued-badge';
+                        pickBadge.textContent = "cont'd";
+                        pickEl.appendChild(pickBadge);
+                    }
+                    pickEl.appendChild(createRemoveBtnMulti(sess.options));
+                    content.appendChild(pickEl);
+                } else if (sess.type === 'bonus') {
+                    var bonusCard = document.createElement('div');
+                    bonusCard.className = 'day-card day-card-bonus';
+                    bonusCard.innerHTML = '<span class="day-card-title">' + escapeHtml(sess.label) + '</span>';
+                    content.appendChild(bonusCard);
+                }
+
+                row.appendChild(content);
+                daysContainer.appendChild(row);
+            });
+
+            weekEl.appendChild(daysContainer);
+            plannerWeeksEl.appendChild(weekEl);
+        });
+    }
+
+    // ---- Part-time compressed table rendering ----
+    function renderPartTimeTable(result) {
+        plannerWeeksEl.innerHTML = '';
+
+        var container = document.createElement('div');
+        container.className = 'compressed-table-container';
+
+        var table = document.createElement('table');
+        table.className = 'compressed-table';
+
+        // Header row with dynamic day labels
+        var dayLabels = [];
+        for (var di = 0; di < state.studyDays.length; di++) {
+            dayLabels.push(DAY_NAME_MAP[state.studyDays[di]] || state.studyDays[di]);
+        }
+
+        var thead = document.createElement('thead');
+        var headerRow = document.createElement('tr');
+        var thWeek = document.createElement('th');
+        thWeek.textContent = 'Week';
+        headerRow.appendChild(thWeek);
+        dayLabels.forEach(function(label) {
+            var th = document.createElement('th');
+            th.textContent = label;
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Body rows
+        var tbody = document.createElement('tbody');
+        result.weeks.forEach(function(week) {
+            var tr = document.createElement('tr');
+            tr.style.setProperty('--week-color', week.color);
+
+            // Week label cell
+            var tdLabel = document.createElement('td');
+            tdLabel.innerHTML = '<div class="compressed-week-label">' +
+                '<span class="compressed-week-num">Week ' + week.weekNum + '</span>' +
+                '<span class="compressed-week-title">' + escapeHtml(week.chapterTitle || '') + '</span>' +
+                '</div>';
+            tr.appendChild(tdLabel);
+
+            // Session cells
+            for (var si = 0; si < dayLabels.length; si++) {
+                var td = document.createElement('td');
+                td.className = 'compressed-cell';
+                if (si < week.sessions.length) {
+                    var sess = week.sessions[si];
+                    if (sess.type === 'capstone') {
+                        td.innerHTML = '<div class="compressed-cell-bonus"><em>Capstone</em></div>';
+                    } else if (sess.type === 'fixed') {
+                        var cellHtml = renderCompressedFixedCell(sess.section);
+                        if (sess.continued) {
+                            cellHtml += '<span class="pt-continued-badge">cont\'d</span>';
+                        }
+                        td.innerHTML = cellHtml;
+                        td.appendChild(createRemoveBtn(sess.section));
+                    } else if (sess.type === 'fixed_double') {
+                        var dblHtml = renderCompressedFixedDoubleCell(sess);
+                        if (sess.continued) {
+                            dblHtml += '<span class="pt-continued-badge">cont\'d</span>';
+                        }
+                        td.innerHTML = dblHtml;
+                        td.appendChild(createRemoveBtn(sess.sections[0]));
+                    } else if (sess.type === 'pick') {
+                        var pickCell = renderCompressedPickCellDOM(sess.options, sess.groupLabel);
+                        if (sess.continued) {
+                            var ptBadge = document.createElement('span');
+                            ptBadge.className = 'pt-continued-badge';
+                            ptBadge.textContent = "cont'd";
+                            pickCell.appendChild(ptBadge);
+                        }
+                        td.appendChild(pickCell);
+                        td.appendChild(createRemoveBtnMulti(sess.options));
+                    } else if (sess.type === 'bonus') {
+                        td.innerHTML = '<div class="compressed-cell-bonus">' + escapeHtml(sess.label) + '</div>';
+                    }
+                }
+                tr.appendChild(td);
+            }
+
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        container.appendChild(table);
+        plannerWeeksEl.appendChild(container);
+    }
+
+    // ===== Remove section / Reject pile =====
+    function removeSection(sectionNum) {
+        if (state.removedSections.indexOf(sectionNum) === -1) {
+            state.removedSections.push(sectionNum);
+        }
+        updateUI();
+    }
+
+    function restoreSection(sectionNum) {
+        state.removedSections = state.removedSections.filter(function(s) { return s !== sectionNum; });
+        updateUI();
+    }
+
+    function renderRejectPile() {
+        if (state.removedSections.length === 0) {
+            rejectPileEl.style.display = 'none';
+            return;
+        }
+        rejectPileEl.style.display = '';
+        rejectPileItems.innerHTML = '';
+
+        state.removedSections.forEach(function(sectionNum) {
+            var sec = SECTION_INDEX[sectionNum];
+            var item = document.createElement('div');
+            item.className = 'reject-pile-item';
+            item.innerHTML = '<span class="reject-pile-item-plus">+</span>' +
+                '<span class="reject-pile-item-num">' + escapeHtml(sectionNum) + '</span>' +
+                '<span>' + escapeHtml(sec ? sec.title : sectionNum) + '</span>';
+            item.addEventListener('click', function() {
+                restoreSection(sectionNum);
+            });
+            rejectPileItems.appendChild(item);
+        });
+    }
+
+    // Creates an X button for removing a section from the plan
+    function createRemoveBtn(sectionNum) {
+        var btn = document.createElement('button');
+        btn.className = 'cell-remove-btn';
+        btn.innerHTML = '&times;';
+        btn.title = 'Remove from plan';
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            removeSection(sectionNum);
+        });
+        return btn;
+    }
+
+    // Creates an X button that removes multiple sections at once (for pick slots)
+    function createRemoveBtnMulti(sectionNums) {
+        var btn = document.createElement('button');
+        btn.className = 'cell-remove-btn';
+        btn.innerHTML = '&times;';
+        btn.title = 'Remove from plan';
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            sectionNums.forEach(function(num) {
+                if (state.removedSections.indexOf(num) === -1) {
+                    state.removedSections.push(num);
+                }
+            });
+            updateUI();
+        });
+        return btn;
+    }
+
     function escapeHtml(str) {
         if (!str) return '';
         var div = document.createElement('div');
@@ -1863,7 +2900,136 @@ const CHAPTERS_DATA = {{ chapters_json|safe }};
         return div.innerHTML;
     }
 
+    // ===== URL sync =====
+    function stateToURL() {
+        var params = new URLSearchParams();
+        params.set('mode', state.mode === 'part-time' ? 'pt' : 'ft');
+        params.set('weeks', String(state.numWeeks));
+        params.set('ch0', state.includeCh0 ? '1' : '0');
+        params.set('capstone', state.includeCapstone ? '1' : '0');
+        params.set('compressed', state.compressed ? '1' : '0');
+        if (state.droppedChapters.size > 0) {
+            var dropped = [];
+            state.droppedChapters.forEach(function(ch) { dropped.push(ch); });
+            params.set('drop', dropped.join(','));
+        }
+        if (state.mode === 'part-time') {
+            params.set('hours', String(state.hoursPerWeek));
+            params.set('days', state.studyDays.join(','));
+        }
+        if (state.removedSections.length > 0) {
+            params.set('removed', state.removedSections.join(','));
+        }
+        var newUrl = window.location.pathname + '?' + params.toString();
+        history.replaceState(null, '', newUrl);
+    }
+
+    function stateFromURL() {
+        var params = new URLSearchParams(window.location.search);
+        if (!params.has('mode')) return; // No URL state, use defaults
+
+        // Mode
+        var mode = params.get('mode');
+        if (mode === 'pt') {
+            state.mode = 'part-time';
+            ftOptions.style.display = 'none';
+            ptOptions.style.display = '';
+            modeBtns.forEach(function(btn) {
+                btn.classList.toggle('active', btn.dataset.value === 'part-time');
+            });
+        } else {
+            state.mode = 'full-time';
+            ftOptions.style.display = '';
+            ptOptions.style.display = 'none';
+            modeBtns.forEach(function(btn) {
+                btn.classList.toggle('active', btn.dataset.value === 'full-time');
+            });
+        }
+
+        // Weeks
+        if (params.has('weeks')) {
+            var w = parseInt(params.get('weeks'), 10);
+            if (w >= 2 && w <= 5) {
+                state.numWeeks = w;
+                weeksBtns.forEach(function(btn) {
+                    btn.classList.toggle('active', parseInt(btn.dataset.value, 10) === w);
+                });
+            }
+        }
+
+        // Ch0
+        if (params.has('ch0')) {
+            state.includeCh0 = params.get('ch0') === '1';
+            ch0Checkbox.checked = state.includeCh0;
+        }
+
+        // Capstone
+        if (params.has('capstone')) {
+            state.includeCapstone = params.get('capstone') === '1';
+            capstoneCheckbox.checked = state.includeCapstone;
+        }
+
+        // Compressed
+        if (params.has('compressed')) {
+            state.compressed = params.get('compressed') === '1';
+            compressedToggle.checked = state.compressed;
+        }
+
+        // Dropped chapters
+        if (params.has('drop')) {
+            var drops = params.get('drop').split(',');
+            state.droppedChapters.clear();
+            drops.forEach(function(ch) {
+                if (ch === 'interp' || ch === 'rl' || ch === 'evals') {
+                    state.droppedChapters.add(ch);
+                }
+            });
+            dropCheckboxes.forEach(function(cb) {
+                cb.checked = state.droppedChapters.has(cb.value);
+            });
+        }
+
+        // Part-time hours
+        if (params.has('hours')) {
+            var h = parseInt(params.get('hours'), 10);
+            if (h >= 5 && h <= 40) {
+                state.hoursPerWeek = h;
+                ptHoursSlider.value = h;
+                ptHoursValue.textContent = h + ' h/wk';
+            }
+        }
+
+        // Study days
+        if (params.has('days')) {
+            var validDays = ['mon','tue','wed','thu','fri','sat','sun'];
+            var days = params.get('days').split(',').filter(function(d) {
+                return validDays.indexOf(d) !== -1;
+            });
+            if (days.length > 0) {
+                state.studyDays = days;
+                ptDayCheckboxes.forEach(function(cb) {
+                    cb.checked = days.indexOf(cb.value) !== -1;
+                });
+            }
+        }
+
+        // Removed sections
+        if (params.has('removed')) {
+            state.removedSections = params.get('removed').split(',').filter(function(s) {
+                return s && SECTION_INDEX[s];
+            });
+        }
+    }
+
+    // Patch updateUI to sync URL after every render
+    var _origUpdateUI = updateUI;
+    updateUI = function() {
+        _origUpdateUI();
+        stateToURL();
+    };
+
     // ===== Initial render =====
+    stateFromURL();
     updateUI();
 })();
 </script>
