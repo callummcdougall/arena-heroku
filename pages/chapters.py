@@ -7,8 +7,10 @@ import logging
 import time
 from pathlib import Path
 
-import requests
 import yaml
+
+from .github_cache import fetch_github_text
+from .github_cache import invalidate_cache as github_invalidate_cache
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,10 @@ LOCAL_CONFIG_PATHS = [
 # Cache settings
 _config_cache: dict | None = None
 _cache_timestamp: float = 0
-CACHE_TTL_SECONDS = 15  # 15 seconds
+CACHE_TTL_SECONDS = 60
+
+# Chapters dict cache (derived from _config_cache, cleared alongside it)
+_chapters_cache: dict | None = None
 
 
 def _try_load_local_config() -> dict | None:
@@ -46,12 +51,15 @@ def _try_load_local_config() -> dict | None:
 
 def _fetch_config() -> dict:
     """Fetch and parse the config.yaml - locally first, then from GitHub."""
-    global _config_cache, _cache_timestamp
+    global _config_cache, _cache_timestamp, _chapters_cache
 
     # Check if cache is still valid
     now = time.time()
     if _config_cache is not None and (now - _cache_timestamp) < CACHE_TTL_SECONDS:
         return _config_cache
+
+    # Config is being refreshed — invalidate derived chapters cache
+    _chapters_cache = None
 
     # Try local config first (for development)
     config = _try_load_local_config()
@@ -62,9 +70,8 @@ def _fetch_config() -> dict:
 
     # Fall back to GitHub (for production)
     try:
-        response = requests.get(CONFIG_URL, timeout=10)
-        response.raise_for_status()
-        config = yaml.safe_load(response.text)
+        raw_text = fetch_github_text(CONFIG_URL)
+        config = yaml.safe_load(raw_text)
         _config_cache = config
         _cache_timestamp = now
         logger.info("Successfully fetched config from GitHub")
@@ -120,8 +127,15 @@ def _transform_chapter(chapter_id: str, chapter_data: dict) -> dict:
 
 
 def _get_chapters_dict() -> dict:
-    """Get the transformed chapters dictionary."""
+    """Get the transformed chapters dictionary (cached)."""
+    global _chapters_cache
+
+    # _fetch_config handles its own TTL and clears _chapters_cache when config refreshes
     config = _fetch_config()
+
+    if _chapters_cache is not None:
+        return _chapters_cache
+
     chapters_raw = config.get("chapters", {})
 
     result = {}
@@ -132,14 +146,17 @@ def _get_chapters_dict() -> dict:
             continue
         result[chapter_id] = _transform_chapter(chapter_id, chapter_data)
 
+    _chapters_cache = result
     return result
 
 
 def invalidate_cache():
     """Invalidate all caches. Useful for testing or forcing a refresh."""
-    global _config_cache, _cache_timestamp
+    global _config_cache, _cache_timestamp, _chapters_cache
     _config_cache = None
+    _chapters_cache = None
     _cache_timestamp = 0
+    github_invalidate_cache(CONFIG_URL)
 
 
 def get_chapter(chapter_id: str) -> dict | None:
