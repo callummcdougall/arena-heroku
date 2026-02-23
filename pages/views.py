@@ -15,6 +15,7 @@ import requests
 import tiktoken
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
 from django.shortcuts import redirect, render
+from django.views.decorators.cache import cache_control
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from openai import OpenAI
@@ -438,6 +439,7 @@ def custom_404(request, exception):
 
 
 @require_GET
+@cache_control(public=True, max_age=3600)
 def home(request):
     """Homepage view - displays chapter cards."""
     context = _get_context_base()
@@ -445,6 +447,7 @@ def home(request):
 
 
 @require_GET
+@cache_control(public=True, max_age=3600)
 def faq(request):
     """FAQ page."""
     context = _get_context_base()
@@ -456,6 +459,7 @@ def faq(request):
 
 
 @require_GET
+@cache_control(public=True, max_age=3600)
 def setup(request):
     """Setup instructions page."""
     context = _get_context_base()
@@ -467,6 +471,7 @@ def setup(request):
 
 
 @require_GET
+@cache_control(public=True, max_age=3600)
 def planner_view(request):
     """Planner page - interactive week-by-week course schedule builder."""
     context = _get_context_base()
@@ -475,6 +480,7 @@ def planner_view(request):
 
 
 @require_GET
+@cache_control(public=True, max_age=300)
 def chapter_view(request, chapter_id: str, section_id: str | None = None, subsection_id: str | None = None):
     """
     Main chapter view - handles full page loads.
@@ -561,6 +567,7 @@ def chapter_view(request, chapter_id: str, section_id: str | None = None, subsec
 
 
 @require_GET
+@cache_control(public=True, max_age=300)
 def section_api(request, chapter_id: str, section_id: str):
     """
     API endpoint to fetch section content as JSON.
@@ -684,6 +691,7 @@ def _stream_chat_response(messages: list, model: str):
 
 
 @require_GET
+@cache_control(public=True, max_age=300)
 def static_context_api(request):
     """
     API endpoint to get static page content for chat context.
