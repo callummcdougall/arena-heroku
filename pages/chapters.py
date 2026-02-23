@@ -7,8 +7,10 @@ import logging
 import time
 from pathlib import Path
 
-import requests
 import yaml
+
+from .github_cache import fetch_github_text
+from .github_cache import invalidate_cache as github_invalidate_cache
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ LOCAL_CONFIG_PATHS = [
 # Cache settings
 _config_cache: dict | None = None
 _cache_timestamp: float = 0
-CACHE_TTL_SECONDS = 15  # 15 seconds
+CACHE_TTL_SECONDS = 60
 
 
 def _try_load_local_config() -> dict | None:
@@ -62,9 +64,8 @@ def _fetch_config() -> dict:
 
     # Fall back to GitHub (for production)
     try:
-        response = requests.get(CONFIG_URL, timeout=10)
-        response.raise_for_status()
-        config = yaml.safe_load(response.text)
+        raw_text = fetch_github_text(CONFIG_URL)
+        config = yaml.safe_load(raw_text)
         _config_cache = config
         _cache_timestamp = now
         logger.info("Successfully fetched config from GitHub")
@@ -140,6 +141,7 @@ def invalidate_cache():
     global _config_cache, _cache_timestamp
     _config_cache = None
     _cache_timestamp = 0
+    github_invalidate_cache(CONFIG_URL)
 
 
 def get_chapter(chapter_id: str) -> dict | None:
