@@ -408,6 +408,9 @@
                 console.log(`[right-sidebar] Preloading markdown for '${section.id}': ${GITHUB_RAW_BASE}${section.path}`);
                 fetchAndCache(section.id, 'markdown', section.path);
             }
+
+            // Stagger requests to avoid overwhelming the server
+            await new Promise(resolve => setTimeout(resolve, 300));
         }
     }
 
