@@ -279,6 +279,9 @@ def _process_details_content(text: str) -> str:
 
 def _render_markdown(text: str) -> str:
     """Convert markdown text to HTML."""
+    # Normalize line endings (some GitHub files use CRLF)
+    text = text.replace("\r\n", "\n")
+
     # Pre-process to handle exercise info blocks
     text = _preprocess_exercise_blocks(text)
 

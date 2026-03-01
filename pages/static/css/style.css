@@ -1582,7 +1582,7 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 
 .sections-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: var(--spacing-md);
 }
 
@@ -2266,9 +2266,6 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     color: var(--color-text);
     padding: var(--spacing-xs) 0;
     list-style: none;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
 }
 
 .markdown-content details summary::-webkit-details-marker {
@@ -2278,6 +2275,8 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 .markdown-content details summary::before {
     content: '▶';
     font-size: 0.75em;
+    display: inline-block;
+    margin-right: var(--spacing-sm);
     transition: transform var(--transition-fast);
 }
 
