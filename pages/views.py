@@ -526,7 +526,9 @@ def chapter_view(request, chapter_id: str, section_id: str | None = None, subsec
         else:
             text = _fetch_text(_raw_url(section["path"]))
         subsections = _parse_subsections(text)
-    except Http404:
+    except Http404 as e:
+        url = section.get("local_path") or _raw_url(section.get("path", ""))
+        logger.warning("Content not found for section '%s' (%s): %s", section_id, url, e)
         subsections = [
             {
                 "index": 0,
@@ -537,6 +539,7 @@ def chapter_view(request, chapter_id: str, section_id: str | None = None, subsec
             }
         ]
     except requests.RequestException as e:
+        logger.warning("Request failed for section '%s': %s", section_id, e)
         subsections = [
             {
                 "index": 0,
@@ -603,7 +606,8 @@ def section_api(request, chapter_id: str, section_id: str):
             text = _fetch_text(_raw_url(path))
         subsections = _parse_subsections(text)
     except Http404 as e:
-        logger.debug("Http404 caught: %s", e)
+        url = section.get("local_path") or _raw_url(section.get("path", ""))
+        logger.warning("API: Content not found for section '%s' (%s): %s", section_id, url, e)
         subsections = [
             {
                 "index": 0,
