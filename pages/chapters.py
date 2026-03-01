@@ -97,9 +97,10 @@ def _build_paths(chapter_id: str, section: dict) -> dict:
     if "page_file" in section_copy:
         section_copy["path"] = f"{chapter_id}/instructions/pages/{section_copy['page_file']}"
 
-    # Build python_path: {chapter_name}/exercises/{exercise_dir}/solutions.py
+    # Build python_path: {chapter_name}/exercises/{exercise_dir}/{python_file}
     if "exercise_dir" in section_copy:
-        section_copy["python_path"] = f"{chapter_id}/exercises/{section_copy['exercise_dir']}/solutions.py"
+        python_file = section_copy.get("python_file", "solutions.py")
+        section_copy["python_path"] = f"{chapter_id}/exercises/{section_copy['exercise_dir']}/{python_file}"
 
     return section_copy
 
