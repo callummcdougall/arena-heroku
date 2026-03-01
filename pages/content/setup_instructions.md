@@ -1,6 +1,6 @@
 # Setup Instructions
 
-> Note - this material currently exists in the ARENA repo, on the [`alignment-science` branch](https://github.com/callummcdougall/ARENA_3.0/tree/alignment-science) (not `main`). Make sure when you're cloning the repo that you clone this branch, not the main branch. We plan to merge into the main branch in late February.
+> Note - this material exists in the [ARENA repo](https://github.com/callummcdougall/ARENA_3.0), on the `main` branch.
 
 ---
 

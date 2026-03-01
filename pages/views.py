@@ -53,7 +53,7 @@ def _raw_url(md_path: str) -> str:
     owner = os.environ.get("GH_OWNER", "callummcdougall")
     # repo = os.environ.get("GH_REPO", "ARENA_3.0")
     repo = os.environ.get("GH_REPO", "ARENA_3.0")
-    branch = os.environ.get("GH_BRANCH", "alignment-science")
+    branch = os.environ.get("GH_BRANCH", "main")
     return f"https://raw.githubusercontent.com/{owner}/{repo}/refs/heads/{branch}/{md_path}"
 
 

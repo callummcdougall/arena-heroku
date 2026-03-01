@@ -22,7 +22,7 @@
     let chatHelpTooltip = null;
 
     // GitHub raw content base URL
-    const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/callummcdougall/ARENA_3.0/refs/heads/alignment-science/';
+    const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/callummcdougall/ARENA_3.0/refs/heads/main/';
 
     // Cache for file contents and token counts
     // sectionId -> { python: { content, tokens }, markdown: { content, tokens } }
