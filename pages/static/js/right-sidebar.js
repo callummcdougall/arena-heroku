@@ -399,11 +399,13 @@
 
             // Fetch Python file
             if (section.python_path) {
+                console.log(`[right-sidebar] Preloading python for '${section.id}': ${GITHUB_RAW_BASE}${section.python_path}`);
                 fetchAndCache(section.id, 'python', section.python_path);
             }
 
             // Fetch Markdown file
             if (section.path) {
+                console.log(`[right-sidebar] Preloading markdown for '${section.id}': ${GITHUB_RAW_BASE}${section.path}`);
                 fetchAndCache(section.id, 'markdown', section.path);
             }
         }
@@ -418,9 +420,10 @@
             const response = await fetch(url);
 
             if (!response.ok) {
-                console.warn(`Failed to fetch ${filePath}: ${response.status}`);
+                console.error(`[right-sidebar] FAILED ${type} for '${sectionId}': ${url} -> HTTP ${response.status}`);
                 return;
             }
+            console.log(`[right-sidebar] OK ${type} for '${sectionId}': ${url}`);
 
             const content = await response.text();
 

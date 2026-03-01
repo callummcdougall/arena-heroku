@@ -522,9 +522,13 @@ def chapter_view(request, chapter_id: str, section_id: str | None = None, subsec
     try:
         # Check if this is a local content file (group overview) or remote
         if section.get("local_path"):
+            logger.info("Loading local content for '%s': %s", section_id, section["local_path"])
             text = _read_local_content(section["local_path"])
         else:
-            text = _fetch_text(_raw_url(section["path"]))
+            url = _raw_url(section["path"])
+            logger.info("Fetching remote content for '%s': %s", section_id, url)
+            text = _fetch_text(url)
+        logger.info("Content loaded for '%s' (%d chars)", section_id, len(text))
         subsections = _parse_subsections(text)
     except Http404 as e:
         url = section.get("local_path") or _raw_url(section.get("path", ""))
@@ -595,15 +599,17 @@ def section_api(request, chapter_id: str, section_id: str):
     try:
         # Check if this is a local content file (group overview) or remote
         if section.get("local_path"):
-            logger.debug("Loading local content: %s", section["local_path"])
+            logger.info("API: Loading local content for '%s': %s", section_id, section["local_path"])
             text = _read_local_content(section["local_path"])
         else:
             path = section.get("path")
-            logger.debug("Section '%s' path: %s", section_id, path)
             if not path:
-                logger.warning("No 'path' key in section: %s", section)
+                logger.warning("API: No 'path' key in section: %s", section)
                 raise Http404(f"No path configured for section {section_id}")
-            text = _fetch_text(_raw_url(path))
+            url = _raw_url(path)
+            logger.info("API: Fetching remote content for '%s': %s", section_id, url)
+            text = _fetch_text(url)
+        logger.info("API: Content loaded for '%s' (%d chars)", section_id, len(text))
         subsections = _parse_subsections(text)
     except Http404 as e:
         url = section.get("local_path") or _raw_url(section.get("path", ""))

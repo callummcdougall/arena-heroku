@@ -50,6 +50,11 @@
             try {
                 chapter = JSON.parse(chapterDataEl.textContent);
                 currentChapterId = chapter.id;
+                console.log(`[chapter-nav] Loaded chapter: ${chapter.id}, sections:`,
+                    chapter.sections?.filter(s => !s.is_group).map(s => ({
+                        id: s.id, path: s.path, python_path: s.python_path
+                    }))
+                );
             } catch (e) {
                 console.error('Failed to parse chapter data:', e);
                 return;
@@ -367,12 +372,22 @@
         }
 
         // Fetch from API
-        const response = await fetch(`/api/${currentChapterId}/${sectionId}/`);
+        const apiUrl = `/api/${currentChapterId}/${sectionId}/`;
+        console.log(`[chapter-nav] Fetching section: ${apiUrl}`);
+        const response = await fetch(apiUrl);
         if (!response.ok) {
+            console.error(`[chapter-nav] API error for ${apiUrl}: HTTP ${response.status}`);
             throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
+        const firstHtml = data.subsections?.[0]?.html || '';
+        const isUnavailable = firstHtml.includes('not yet available');
+        if (isUnavailable) {
+            console.warn(`[chapter-nav] Section '${sectionId}' returned "not yet available" from ${apiUrl}`);
+        } else {
+            console.log(`[chapter-nav] Section '${sectionId}' loaded OK (${data.subsections?.length} subsections)`);
+        }
 
         // Cache the result
         sectionCache.set(sectionId, data);
