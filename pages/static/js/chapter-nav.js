@@ -384,7 +384,9 @@
         const firstHtml = data.subsections?.[0]?.html || '';
         const isUnavailable = firstHtml.includes('not yet available');
         if (isUnavailable) {
-            console.warn(`[chapter-nav] Section '${sectionId}' returned "not yet available" from ${apiUrl}`);
+            const debugMatch = firstHtml.match(/<!-- DEBUG: tried URL: (.+?) -->/);
+            const triedUrl = debugMatch ? debugMatch[1] : 'unknown';
+            console.error(`[chapter-nav] Section '${sectionId}' NOT FOUND. Server tried: ${triedUrl}`);
         } else {
             console.log(`[chapter-nav] Section '${sectionId}' loaded OK (${data.subsections?.length} subsections)`);
         }

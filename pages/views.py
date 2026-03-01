@@ -538,7 +538,8 @@ def chapter_view(request, chapter_id: str, section_id: str | None = None, subsec
                 "index": 0,
                 "id": "intro",
                 "title": section["title"],
-                "html": f"<p>Content for '{section['title']}' is not yet available.</p>",
+                "html": f"<p>Content for '{section['title']}' is not yet available.</p>"
+                f"<!-- DEBUG: tried URL: {url} -->",
                 "headers": [],
             }
         ]
@@ -619,7 +620,8 @@ def section_api(request, chapter_id: str, section_id: str):
                 "index": 0,
                 "id": "intro",
                 "title": section["title"],
-                "html": f"<p>Content for '{section['title']}' is not yet available.</p>",
+                "html": f"<p>Content for '{section['title']}' is not yet available.</p>"
+                f"<!-- DEBUG: tried URL: {url} -->",
                 "headers": [],
             }
         ]
