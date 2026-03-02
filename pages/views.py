@@ -19,9 +19,6 @@ from django.views.decorators.cache import cache_control
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from openai import OpenAI
-from pygments import highlight
-from pygments.formatters import HtmlFormatter
-from pygments.lexers import TextLexer, get_lexer_by_name, guess_lexer
 
 from .chapters import get_all_chapters, get_chapter, get_section
 from .github_cache import fetch_github_text
@@ -172,40 +169,27 @@ def _restore_latex(html_text: str, placeholders: dict) -> str:
     return html_text
 
 
-def _highlight_code(code: str, lang: str) -> str:
-    """Highlight code using Pygments."""
-    try:
-        if lang:
-            lexer = get_lexer_by_name(lang, stripall=True)
-        else:
-            lexer = guess_lexer(code)
-    except Exception:
-        lexer = TextLexer()
-
-    formatter = HtmlFormatter(nowrap=True)
-    highlighted = highlight(code, lexer, formatter)
-    return f'<div class="codehilite"><pre>{highlighted}</pre></div>'
-
-
-def _process_details_content(text: str) -> str:
+def _preprocess_details_blocks(text: str) -> tuple[str, dict]:
     """
-    Pre-process <details> blocks to ensure markdown inside them is rendered.
+    Pre-render <details> block content before the main markdown call.
 
-    Markdown doesn't process content inside HTML tags, so we need to:
-    1. Extract content from <details> blocks
-    2. Process that content as markdown
-    3. Reconstruct the details block with rendered content
+    The main md.markdown() call does not process markdown inside raw HTML blocks
+    (like <details>). This function extracts each <details> block, renders its
+    content using md.markdown() (so code blocks get proper Pygments highlighting
+    and no italic/bold is accidentally applied inside code), and replaces the
+    block with a placeholder. The rendered HTML is restored after the main call.
+
+    Returns (modified_text, placeholders_dict).
     """
+    placeholders: dict[str, str] = {}
 
-    def render_details_block(match):
+    def render_and_replace(match: re.Match) -> str:
         full_match = match.group(0)
-        # Extract the summary line
         summary_match = re.search(r"<summary>(.*?)</summary>", full_match, re.DOTALL)
         if not summary_match:
             return full_match
 
-        summary = summary_match.group(0)
-        # Get content after summary and before </details>
+        summary_tag = summary_match.group(0)
         content_start = full_match.find("</summary>") + len("</summary>")
         content_end = full_match.rfind("</details>")
         if content_end == -1:
@@ -213,81 +197,31 @@ def _process_details_content(text: str) -> str:
 
         content = full_match[content_start:content_end].strip()
 
-        # Process the content as markdown (basic inline formatting)
-        # Handle code blocks first (``` ... ```) with Pygments highlighting
-        code_blocks = {}
+        # Handle blockquotes inside details
+        content = content.replace("<blockquote>", '<blockquote markdown="1">')
 
-        def protect_code_block(m):
-            placeholder = f"CODEBLOCK{uuid.uuid4().hex}END"
-            lang = m.group(1) or "python"
-            code = m.group(2)
-            code_blocks[placeholder] = _highlight_code(code, lang)
-            return placeholder
+        # Render the content with markdown (same extensions minus toc, since
+        # headers inside <details> shouldn't appear in the page-level TOC)
+        rendered_content = md.markdown(
+            content,
+            extensions=["codehilite", "fenced_code", "tables", "md_in_html"],
+            extension_configs={
+                "codehilite": {
+                    "css_class": "codehilite",
+                    "guess_lang": True,
+                    "linenums": False,
+                    "use_pygments": True,
+                },
+            },
+        )
 
-        content = re.sub(r"```(\w*)\n(.*?)```", protect_code_block, content, flags=re.DOTALL)
+        details_html = f"<details>\n{summary_tag}\n{rendered_content}\n</details>"
+        placeholder = f"DETAILSBLOCK{uuid.uuid4().hex}END"
+        placeholders[placeholder] = details_html
+        return placeholder
 
-        # The fenced_code preprocessor runs on raw text before md.markdown() does block
-        # parsing, so ``` blocks inside <details> are already converted to rendered HTML
-        # by the time _process_details_content sees the content. Protect those rendered
-        # blocks so the italic/bold regexes below don't corrupt their content.
-        def protect_html_block(m):
-            placeholder = f"CODEBLOCK{uuid.uuid4().hex}END"
-            code_blocks[placeholder] = m.group(0)
-            return placeholder
-
-        content = re.sub(r'<div class="codehilite">.*?</div>', protect_html_block, content, flags=re.DOTALL)
-        content = re.sub(r"<pre>.*?</pre>", protect_html_block, content, flags=re.DOTALL)
-        content = re.sub(r"<code>.*?</code>", protect_html_block, content, flags=re.DOTALL)
-
-        # Handle inline code
-        content = re.sub(r"`([^`]+)`", r"<code>\1</code>", content)
-        # Handle bold
-        content = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", content)
-        # Handle italic (but not inside code blocks or after *)
-        content = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"<em>\1</em>", content)
-
-        # Restore code blocks
-        for placeholder, code_html in code_blocks.items():
-            content = content.replace(placeholder, code_html)
-
-        # Process content blocks (paragraphs and lists)
-        paragraphs = content.split("\n\n")
-        processed_paragraphs = []
-        for p in paragraphs:
-            p = p.strip()
-            if not p:
-                continue
-            # Check if this is a bullet list (lines starting with "- ")
-            lines = p.split("\n")
-            if all(line.strip().startswith("- ") or line.strip() == "" for line in lines if line.strip()):
-                # Convert bullet list to HTML
-                list_items = []
-                for line in lines:
-                    line = line.strip()
-                    if line.startswith("- "):
-                        list_items.append(f"<li>{line[2:]}</li>")
-                if list_items:
-                    p = f"<ul>{''.join(list_items)}</ul>"
-            # Check if this is a numbered list (lines starting with "1. ", "2. ", etc.)
-            elif all(re.match(r"^\d+\.\s", line.strip()) or line.strip() == "" for line in lines if line.strip()):
-                list_items = []
-                for line in lines:
-                    line = line.strip()
-                    if re.match(r"^\d+\.\s", line):
-                        item_text = re.sub(r"^\d+\.\s", "", line)
-                        list_items.append(f"<li>{item_text}</li>")
-                if list_items:
-                    p = f"<ol>{''.join(list_items)}</ol>"
-            elif not p.startswith("<"):
-                p = f"<p>{p}</p>"
-            processed_paragraphs.append(p)
-        content = "\n".join(processed_paragraphs)
-
-        return f"<details>\n{summary}\n{content}\n</details>"
-
-    # Match <details>...</details> blocks
-    text = re.sub(r"<details>.*?</details>", render_details_block, text, flags=re.DOTALL)
-    return text
+    text = re.sub(r"<details>.*?</details>", render_and_replace, text, flags=re.DOTALL)
+    return text, placeholders
 
 
 def _render_markdown(text: str) -> str:
@@ -303,6 +237,12 @@ def _render_markdown(text: str) -> str:
 
     # Protect LaTeX blocks from markdown processing
     text, latex_placeholders = _protect_latex(text)
+
+    # Pre-render <details> block content BEFORE the main markdown call.
+    # This ensures code blocks inside dropdowns are syntax-highlighted by
+    # Pygments (so * operators stay as <span> tags) rather than being passed
+    # through the post-hoc italic/bold regex, which could misinterpret them.
+    text, details_placeholders = _preprocess_details_blocks(text)
 
     # Configure markdown with proper syntax highlighting
     # Note: codehilite must come BEFORE fenced_code for proper integration
@@ -325,11 +265,13 @@ def _render_markdown(text: str) -> str:
         },
     )
 
+    # Restore <details> blocks (before LaTeX so LaTeX inside details is restored too)
+    for placeholder, details_html in details_placeholders.items():
+        rendered = rendered.replace(f"<p>{placeholder}</p>", details_html)
+        rendered = rendered.replace(placeholder, details_html)
+
     # Restore LaTeX blocks
     rendered = _restore_latex(rendered, latex_placeholders)
-
-    # Post-process details blocks to render markdown inside them
-    rendered = _process_details_content(rendered)
 
     return rendered
 
