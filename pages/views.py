@@ -34,7 +34,11 @@ _tiktoken_encoder = tiktoken.get_encoding("cl100k_base")
 # Delimiter for sub-sections within a markdown file
 SUBSECTION_DELIMITER = "=== NEW CHAPTER ==="
 
-# Render cache: sha256(raw_text) -> parsed subsections list
+# Bump this string whenever _render_markdown logic changes so that cached
+# entries from a previous code version are automatically invalidated.
+_RENDER_VERSION = "2025-03-02-details-prerender"
+
+# Render cache: sha256(version + raw_text) -> parsed subsections list
 _render_cache: dict[str, list[dict]] = {}
 _render_lock = threading.Lock()
 
@@ -321,7 +325,7 @@ def _parse_subsections(markdown_text: str) -> list[dict]:
     Results are cached by sha256(markdown_text) since the render pipeline is
     deterministic — identical input always produces identical output.
     """
-    cache_key = hashlib.sha256(markdown_text.encode()).hexdigest()
+    cache_key = hashlib.sha256((_RENDER_VERSION + markdown_text).encode()).hexdigest()
 
     with _render_lock:
         cached = _render_cache.get(cache_key)
