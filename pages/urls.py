@@ -12,6 +12,7 @@ from .views import (
     setup,
     static_context_api,
     token_count_api,
+    version_view,
 )
 
 # Old section IDs that were moved from chapter1 to chapter4
@@ -26,6 +27,7 @@ _OLD_SECTION_IDS = [
 
 urlpatterns = [
     path("", home, name="home"),
+    path("version/", version_view, name="version"),
     path("planner/", planner_view, name="planner"),
     path("setup/", setup, name="setup"),
     path("faq/", faq, name="faq"),

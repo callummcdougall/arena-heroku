@@ -407,6 +407,13 @@ def custom_404(request, exception):
 
 
 @require_GET
+@cache_control(no_store=True)
+def version_view(request):
+    """Debug endpoint: returns current render version with no caching."""
+    return JsonResponse({"render_version": _RENDER_VERSION})
+
+
+@require_GET
 @cache_control(public=True, max_age=3600)
 def home(request):
     """Homepage view - displays chapter cards."""
