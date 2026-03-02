@@ -36,7 +36,7 @@ SUBSECTION_DELIMITER = "=== NEW CHAPTER ==="
 
 # Bump this string whenever _render_markdown logic changes so that cached
 # entries from a previous code version are automatically invalidated.
-_RENDER_VERSION = "2025-03-02-details-prerender"
+_RENDER_VERSION = "2026-03-02-v3-details-prerender"
 
 # Render cache: sha256(version + raw_text) -> parsed subsections list
 _render_cache: dict[str, list[dict]] = {}
@@ -189,7 +189,8 @@ def _preprocess_details_blocks(text: str) -> tuple[str, dict]:
 
     def render_and_replace(match: re.Match) -> str:
         full_match = match.group(0)
-        summary_match = re.search(r"<summary>(.*?)</summary>", full_match, re.DOTALL)
+        opening_tag = match.group(1)  # e.g. "<details>" or "<details open>"
+        summary_match = re.search(r"<summary[^>]*>(.*?)</summary>", full_match, re.DOTALL)
         if not summary_match:
             return full_match
 
@@ -219,12 +220,12 @@ def _preprocess_details_blocks(text: str) -> tuple[str, dict]:
             },
         )
 
-        details_html = f"<details>\n{summary_tag}\n{rendered_content}\n</details>"
+        details_html = f"{opening_tag}\n{summary_tag}\n{rendered_content}\n</details>"
         placeholder = f"DETAILSBLOCK{uuid.uuid4().hex}END"
         placeholders[placeholder] = details_html
         return placeholder
 
-    text = re.sub(r"<details>.*?</details>", render_and_replace, text, flags=re.DOTALL)
+    text = re.sub(r"(<details[^>]*>).*?</details>", render_and_replace, text, flags=re.DOTALL)
     return text, placeholders
 
 
@@ -372,6 +373,7 @@ def _get_context_base() -> dict:
     """Get base context with chapters list."""
     return {
         "chapters": get_all_chapters(),
+        "render_version": _RENDER_VERSION,
     }
 
 
