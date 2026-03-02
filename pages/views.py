@@ -226,6 +226,19 @@ def _process_details_content(text: str) -> str:
 
         content = re.sub(r"```(\w*)\n(.*?)```", protect_code_block, content, flags=re.DOTALL)
 
+        # The fenced_code preprocessor runs on raw text before md.markdown() does block
+        # parsing, so ``` blocks inside <details> are already converted to rendered HTML
+        # by the time _process_details_content sees the content. Protect those rendered
+        # blocks so the italic/bold regexes below don't corrupt their content.
+        def protect_html_block(m):
+            placeholder = f"CODEBLOCK{uuid.uuid4().hex}END"
+            code_blocks[placeholder] = m.group(0)
+            return placeholder
+
+        content = re.sub(r'<div class="codehilite">.*?</div>', protect_html_block, content, flags=re.DOTALL)
+        content = re.sub(r"<pre>.*?</pre>", protect_html_block, content, flags=re.DOTALL)
+        content = re.sub(r"<code>.*?</code>", protect_html_block, content, flags=re.DOTALL)
+
         # Handle inline code
         content = re.sub(r"`([^`]+)`", r"<code>\1</code>", content)
         # Handle bold
