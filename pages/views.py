@@ -28,6 +28,12 @@ logger = logging.getLogger(__name__)
 # Directory for local content files (group overview pages)
 CONTENT_DIR = Path(__file__).parent / "content"
 
+# Local ARENA_3.0 repo paths (for development) - same layout as chapters.py
+LOCAL_ARENA_PATHS = [
+    Path(__file__).parent.parent.parent.parent / "ARENA_3.0",
+    Path(__file__).parent.parent.parent / "ARENA_3.0",
+]
+
 # Initialize tiktoken encoder (cl100k_base is used by GPT-4, Claude, etc.)
 _tiktoken_encoder = tiktoken.get_encoding("cl100k_base")
 
@@ -58,6 +64,16 @@ def _raw_url(md_path: str) -> str:
     return f"https://raw.githubusercontent.com/{owner}/{repo}/refs/heads/{branch}/{md_path}"
 
 
+def _try_read_local_arena(md_path: str) -> str | None:
+    """Try to read a file from the local ARENA_3.0 directory (for development)."""
+    for base in LOCAL_ARENA_PATHS:
+        filepath = base / md_path
+        if filepath.exists():
+            logger.info("Reading from local ARENA_3.0: %s", filepath)
+            return filepath.read_text(encoding="utf-8")
+    return None
+
+
 def _fetch_text(url: str) -> str:
     """Fetch text content from a GitHub raw URL (with ETag caching)."""
     headers = {}
@@ -70,6 +86,14 @@ def _fetch_text(url: str) -> str:
         if exc.response is not None and exc.response.status_code == 404:
             raise Http404(f"Content not found: {url}") from exc
         raise
+
+
+def _fetch_content(md_path: str) -> str:
+    """Fetch content for a file path: local ARENA_3.0 first, then GitHub."""
+    local = _try_read_local_arena(md_path)
+    if local is not None:
+        return local
+    return _fetch_text(_raw_url(md_path))
 
 
 def _read_local_content(filename: str) -> str:
@@ -493,13 +517,12 @@ def chapter_view(request, chapter_id: str, section_id: str | None = None, subsec
             logger.info("Loading local content for '%s': %s", section_id, section["local_path"])
             text = _read_local_content(section["local_path"])
         else:
-            url = _raw_url(section["path"])
-            logger.info("Fetching remote content for '%s': %s", section_id, url)
-            text = _fetch_text(url)
+            logger.info("Fetching content for '%s': %s", section_id, section["path"])
+            text = _fetch_content(section["path"])
         logger.info("Content loaded for '%s' (%d chars)", section_id, len(text))
         subsections = _parse_subsections(text)
     except Http404 as e:
-        url = section.get("local_path") or _raw_url(section.get("path", ""))
+        url = section.get("local_path") or section.get("path", "")
         logger.warning("Content not found for section '%s' (%s): %s", section_id, url, e)
         subsections = [
             {
@@ -575,13 +598,12 @@ def section_api(request, chapter_id: str, section_id: str):
             if not path:
                 logger.warning("API: No 'path' key in section: %s", section)
                 raise Http404(f"No path configured for section {section_id}")
-            url = _raw_url(path)
-            logger.info("API: Fetching remote content for '%s': %s", section_id, url)
-            text = _fetch_text(url)
+            logger.info("API: Fetching content for '%s': %s", section_id, path)
+            text = _fetch_content(path)
         logger.info("API: Content loaded for '%s' (%d chars)", section_id, len(text))
         subsections = _parse_subsections(text)
     except Http404 as e:
-        url = section.get("local_path") or _raw_url(section.get("path", ""))
+        url = section.get("local_path") or section.get("path", "")
         logger.warning("API: Content not found for section '%s' (%s): %s", section_id, url, e)
         subsections = [
             {
@@ -611,6 +633,22 @@ def section_api(request, chapter_id: str, section_id: str):
             "subsections": subsections,
         }
     )
+
+
+@require_GET
+@cache_control(public=True, max_age=300)
+def raw_content_api(request, file_path: str):
+    """
+    Serve raw file content: local ARENA_3.0 first, then GitHub.
+    Used by client-side JS for downloading/copying context.
+    """
+    try:
+        text = _fetch_content(file_path)
+        return HttpResponse(text, content_type="text/plain; charset=utf-8")
+    except Http404:
+        return HttpResponse("Not found", status=404, content_type="text/plain")
+    except requests.RequestException as e:
+        return HttpResponse(f"Error: {e}", status=502, content_type="text/plain")
 
 
 @csrf_exempt

@@ -21,8 +21,8 @@
     let chatClearBtn = null;
     let chatHelpTooltip = null;
 
-    // GitHub raw content base URL
-    const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/callummcdougall/ARENA_3.0/refs/heads/main/';
+    // Content base URL - served via Django (local-first, then GitHub)
+    const CONTENT_BASE = '/api/raw/';
 
     // Cache for file contents and token counts
     // sectionId -> { python: { content, tokens }, markdown: { content, tokens } }
@@ -399,13 +399,13 @@
 
             // Fetch Python file
             if (section.python_path) {
-                console.log(`[right-sidebar] Preloading python for '${section.id}': ${GITHUB_RAW_BASE}${section.python_path}`);
+                console.log(`[right-sidebar] Preloading python for '${section.id}': ${CONTENT_BASE}${section.python_path}`);
                 fetchAndCache(section.id, 'python', section.python_path);
             }
 
             // Fetch Markdown file
             if (section.path) {
-                console.log(`[right-sidebar] Preloading markdown for '${section.id}': ${GITHUB_RAW_BASE}${section.path}`);
+                console.log(`[right-sidebar] Preloading markdown for '${section.id}': ${CONTENT_BASE}${section.path}`);
                 fetchAndCache(section.id, 'markdown', section.path);
             }
 
@@ -419,7 +419,7 @@
      */
     async function fetchAndCache(sectionId, type, filePath) {
         try {
-            const url = GITHUB_RAW_BASE + filePath;
+            const url = CONTENT_BASE + filePath;
             const response = await fetch(url);
 
             if (!response.ok) {
@@ -764,7 +764,7 @@
             } else {
                 // Fetch if not cached
                 try {
-                    const url = GITHUB_RAW_BASE + filePath;
+                    const url = CONTENT_BASE + filePath;
                     const response = await fetch(url);
 
                     if (!response.ok) {

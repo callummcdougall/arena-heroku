@@ -8,6 +8,7 @@ from .views import (
     home,
     legacy_section_redirect,
     planner_view,
+    raw_content_api,
     section_api,
     setup,
     static_context_api,
@@ -41,6 +42,8 @@ urlpatterns = [
     path("api/static-context/", static_context_api, name="static_context_api"),
     # API endpoint for downloading papers
     path("api/download-papers/", download_papers_api, name="download_papers_api"),
+    # API endpoint for raw file content (local-first, then GitHub)
+    path("api/raw/<path:file_path>", raw_content_api, name="raw_content_api"),
 ]
 
 # Redirects for old chapter1 alignment science section URLs → chapter4
