@@ -110,6 +110,8 @@
         </nav>
 
         <!-- Status banner (always present for JS to toggle; hidden when no status) -->
+        <!-- Hidden for now, since all exercises are complete
+         
         {% if section.status and section.status == "All exercises complete and verified" %}
         <div class="status-banner status-banner-complete" id="status-banner">
             <svg class="status-banner-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -134,7 +136,7 @@
         {% else %}
         <div class="status-banner" id="status-banner" style="display: none;"></div>
         {% endif %}
-
+        -->
         <div id="content-area">
             {% if current_subsection_data %}
             <article class="markdown-content">
