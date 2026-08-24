@@ -2142,6 +2142,107 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 }
 
 /* --------------------------------------------------------------------------
+   Subsection Pager (prev/next beneath the content)
+   -------------------------------------------------------------------------- */
+
+.subsection-pager {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+}
+
+.subsection-pager[hidden] {
+    display: none;
+}
+
+.pager-spacer {
+    flex: 0 1 auto;
+}
+
+.pager-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex: 0 1 48%;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.pager-link:hover {
+    border-color: var(--chapter-color);
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.pager-next {
+    margin-left: auto;
+    text-align: right;
+}
+
+.pager-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    min-width: 0;
+}
+
+.pager-label {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+}
+
+.pager-title {
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    color: inherit;
+}
+
+.pager-arrow {
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+    transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.pager-link:hover .pager-arrow {
+    color: var(--chapter-color);
+}
+
+.pager-prev:hover .pager-arrow {
+    transform: translateX(-2px);
+}
+
+.pager-next:hover .pager-arrow {
+    transform: translateX(2px);
+}
+
+@media (max-width: 560px) {
+    .subsection-pager {
+        flex-direction: column;
+    }
+
+    .pager-link {
+        flex: 1 1 auto;
+    }
+
+    .pager-spacer {
+        display: none;
+    }
+}
+
+/* --------------------------------------------------------------------------
    Table of Contents
    -------------------------------------------------------------------------- */
 

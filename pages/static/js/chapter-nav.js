@@ -22,6 +22,7 @@
     let tocContainer = null;
     let tocList = null;
     let statusBanner = null;
+    let pager = null;
     let sidebar = null;
     let sidebarToggle = null;
     let resizeHandle = null;
@@ -38,6 +39,7 @@
         tocContainer = document.getElementById('sidebar-toc');
         tocList = document.getElementById('toc-list');
         statusBanner = document.getElementById('status-banner');
+        pager = document.getElementById('subsection-pager');
 
         if (!contentArea) {
             console.warn('Chapter navigation: content-area not found');
@@ -257,6 +259,23 @@
             subsectionContainer.addEventListener('click', function(event) {
                 const link = event.target.closest('.subsection-link');
                 if (!link) return;
+
+                event.preventDefault();
+                const subsectionId = link.dataset.subsectionId;
+                if (subsectionId) {
+                    navigateToSubsection(subsectionId);
+                }
+            });
+        }
+
+        // Prev/next pager beneath the content
+        if (pager) {
+            pager.addEventListener('click', function(event) {
+                const link = event.target.closest('.pager-link');
+                if (!link) return;
+
+                // Let modified clicks (new tab, etc.) behave normally
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
 
                 event.preventDefault();
                 const subsectionId = link.dataset.subsectionId;
@@ -587,6 +606,63 @@
                 link.classList.toggle('active', link.dataset.subsectionId === currentSubsectionId);
             });
         }
+
+        // Update the prev/next pager beneath the content
+        renderPager();
+    }
+
+    /**
+     * Build one prev/next pager link
+     */
+    function pagerLink(subsection, direction) {
+        const isNext = direction === 'next';
+        const points = isNext ? '9 18 15 12 9 6' : '15 18 9 12 15 6';
+        const icon = `<svg class="pager-arrow" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="${points}"></polyline></svg>`;
+        const text = `
+                <span class="pager-text">
+                    <span class="pager-label">${isNext ? 'Next' : 'Previous'}</span>
+                    <span class="pager-title">${subsection.title}</span>
+                </span>`;
+
+        return `
+            <a href="/${currentChapterId}/${currentSectionId}/${subsection.id}/"
+               class="pager-link pager-${direction}"
+               rel="${isNext ? 'next' : 'prev'}"
+               data-subsection-id="${subsection.id}">
+                ${isNext ? text + icon : icon + text}
+            </a>
+        `;
+    }
+
+    /**
+     * Render the prev/next pager below the content.
+     * Moves between subsections of the current section only - the "Previous"
+     * button is absent on the first subsection, "Next" on the last.
+     */
+    function renderPager() {
+        if (!pager) return;
+
+        const hide = () => {
+            pager.hidden = true;
+            pager.innerHTML = '';
+        };
+
+        const data = currentSectionId ? sectionCache.get(currentSectionId) : null;
+        const subsections = data && data.subsections;
+        if (!subsections || subsections.length <= 1) return hide();
+
+        const index = subsections.findIndex(s => s.id === currentSubsectionId);
+        if (index === -1) return hide();
+
+        const prev = index > 0 ? subsections[index - 1] : null;
+        const next = index < subsections.length - 1 ? subsections[index + 1] : null;
+        if (!prev && !next) return hide();
+
+        // Spacer keeps a lone "Next" pushed to the right-hand side
+        pager.innerHTML =
+            (prev ? pagerLink(prev, 'prev') : '<span class="pager-spacer"></span>') +
+            (next ? pagerLink(next, 'next') : '');
+        pager.hidden = false;
     }
 
     /**
@@ -655,6 +731,12 @@
         // Hide status banner during loading
         if (statusBanner) {
             statusBanner.style.display = 'none';
+        }
+
+        // Hide the pager too, so it doesn't linger pointing at the old section
+        if (pager) {
+            pager.hidden = true;
+            pager.innerHTML = '';
         }
         
         contentArea.innerHTML = `
