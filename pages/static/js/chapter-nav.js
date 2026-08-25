@@ -82,6 +82,7 @@
                     section: getCurrentSectionMeta(),
                     subsections: subsections,
                 });
+                currentSubsectionId = resolveSubsectionId(currentSectionId, currentSubsectionId);
             } catch (e) {
                 console.error('Failed to parse subsections data:', e);
             }
@@ -234,6 +235,19 @@
     function getCurrentSectionMeta() {
         if (!chapter || !currentSectionId) return null;
         return chapter.sections.find(s => s.id === currentSectionId);
+    }
+
+    /**
+     * Resolve the current subsection for a URL that may omit one.
+     * Every section link points at /<chapter>/<section>/ with no subsection, and
+     * the server renders the first subsection for those (see chapter_view in
+     * views.py). Mirror that fallback here, otherwise the client thinks no
+     * subsection is current and the pager and sidebar disagree with the page.
+     */
+    function resolveSubsectionId(sectionId, subsectionId) {
+        if (subsectionId) return subsectionId;
+        const data = sectionCache.get(sectionId);
+        return data && data.subsections.length ? data.subsections[0].id : null;
     }
 
     /**
@@ -676,7 +690,7 @@
             const parts = path.split('/').filter(p => p);
             if (parts.length >= 2 && parts[0] === currentChapterId) {
                 const sectionId = parts[1];
-                const subsectionId = parts[2] || null;
+                const subsectionId = resolveSubsectionId(sectionId, parts[2] || null);
 
                 if (sectionId !== currentSectionId) {
                     currentSectionId = sectionId;

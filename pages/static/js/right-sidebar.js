@@ -175,7 +175,9 @@
             document.documentElement.style.setProperty('--right-sidebar-width', savedWidth + 'px');
         }
 
-        // Always start expanded on page load (don't restore collapsed state)
+        // The sidebar ships collapsed in the markup (see base.html), so it starts
+        // closed on every page load with no expand-then-collapse flash. The stored
+        // 'rightSidebarCollapsed' value is deliberately not restored here.
     }
 
     /**
