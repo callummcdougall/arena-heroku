@@ -691,6 +691,11 @@ Response style:
 {context_section}"""
 
 
+CHAT_MODEL_REASONING_EFFORTS = {
+    "gpt-5.6-luna": "medium",
+}
+
+
 def _stream_chat_response(messages: list, model: str):
     """Generator that streams chat responses from OpenAI."""
     api_key = os.environ.get("OPENAI_API_KEY")
@@ -701,11 +706,16 @@ def _stream_chat_response(messages: list, model: str):
     try:
         client = OpenAI(api_key=api_key)
 
-        stream = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            stream=True,
-        )
+        request = {
+            "model": model,
+            "messages": messages,
+            "stream": True,
+        }
+        reasoning_effort = CHAT_MODEL_REASONING_EFFORTS.get(model)
+        if reasoning_effort:
+            request["reasoning_effort"] = reasoning_effort
+
+        stream = client.chat.completions.create(**request)
 
         for chunk in stream:
             if chunk.choices[0].delta.content:
@@ -773,13 +783,13 @@ def chat_api(request):
     Accepts JSON body with:
     - messages: list of {role, content} message objects
     - context: optional context string to include in system prompt
-    - model: model to use (default: gpt-4.1-mini)
+    - model: model to use (default: gpt-5.6-luna)
     """
     try:
         data = json.loads(request.body)
         messages = data.get("messages", [])
         context = data.get("context", "")
-        model = data.get("model", "gpt-4.1-mini")
+        model = data.get("model", "gpt-5.6-luna")
 
         if not messages:
             return JsonResponse({"error": "No messages provided"}, status=400)

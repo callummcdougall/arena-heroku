@@ -973,7 +973,7 @@ ${file.content}
         try {
             // Build context from selected sections
             const context = await buildChatContext();
-            const model = chatModelSelect?.value || 'gpt-4.1-mini';
+            const model = chatModelSelect?.value || 'gpt-5.6-luna';
 
             // Prepare messages for API
             const messages = chatHistory.map(msg => ({
