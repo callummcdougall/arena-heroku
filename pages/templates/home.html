@@ -297,7 +297,7 @@
 <template id="modal-sections-{{ chapter.id }}">
     {% for section in chapter.sections %}
     {% if not section.is_group %}
-    <a href="/{{ chapter.id }}/{{ section.id }}/" class="section-item" style="--section-number-color: {{ chapter.color }}">
+    <a href="/{{ chapter.id }}/{{ section.id }}/intro" class="section-item" style="--section-number-color: {{ chapter.color }}">
         <span class="section-number">{{ section.number }}</span>
         <div class="section-info">
             <div class="section-title">{{ section.title }}</div>
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Update modal
             modalTitle.textContent = title;
-            modalGoTo.href = '/' + chapterId + '/intro/';
+            modalGoTo.href = '/' + chapterId;
             modalGoTo.style.background = chapterColor;
 
             // Get sections from template
