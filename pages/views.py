@@ -690,6 +690,13 @@ Response style:
 
 {context_section}"""
 
+# Models the chat endpoint is permitted to call. This is the single source of
+# truth: the model <select> in base.html is rendered from it via
+# pages.context_processors.chat_models, so adding a model here adds it to the
+# dropdown too.
+ALLOWED_CHAT_MODELS = ("gpt-4.1-mini", "gpt-4o-mini")
+DEFAULT_CHAT_MODEL = "gpt-4.1-mini"
+
 
 def _stream_chat_response(messages: list, model: str):
     """Generator that streams chat responses from OpenAI."""
@@ -773,16 +780,22 @@ def chat_api(request):
     Accepts JSON body with:
     - messages: list of {role, content} message objects
     - context: optional context string to include in system prompt
-    - model: model to use (default: gpt-4.1-mini)
+    - model: model to use (must be one of ALLOWED_CHAT_MODELS)
     """
     try:
         data = json.loads(request.body)
         messages = data.get("messages", [])
         context = data.get("context", "")
-        model = data.get("model", "gpt-4.1-mini")
+        model = data.get("model", DEFAULT_CHAT_MODEL)
 
         if not messages:
             return JsonResponse({"error": "No messages provided"}, status=400)
+
+        if model not in ALLOWED_CHAT_MODELS:
+            return JsonResponse(
+                {"error": f"Unsupported model. Allowed models: {', '.join(ALLOWED_CHAT_MODELS)}"},
+                status=400,
+            )
 
         # Build system prompt with context
         if context:

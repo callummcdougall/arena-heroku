@@ -331,8 +331,8 @@
         <div class="chat-model-select">
           <label for="chat-model">Model:</label>
           <select id="chat-model" name="chat-model">
-            <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
-            <option value="gpt-4o-mini">gpt-4o-mini</option>
+            {% for model in chat_models %}<option value="{{ model }}"{% if model == default_chat_model %} selected{% endif %}>{{ model }}</option>
+            {% endfor %}
           </select>
         </div>
 
