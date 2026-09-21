@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}PR #{{ preview.pr }} preview - ARENA{% endblock %}
+
+{% block content %}
+<div class="preview-index">
+    <h1>Preview of pull request #{{ preview.pr }}</h1>
+    {% if preview.title %}<p class="preview-index-title">{{ preview.title }}</p>{% endif %}
+
+    {% if changed_sections %}
+    <p>This pull request changes the pages below. Tick <strong>diff vs main</strong> in the banner to compare a page with the live site.</p>
+    <ul class="preview-index-list">
+        {% for item in changed_sections %}
+        <li>
+            <a href="{{ base_path }}/{{ item.chapter.id }}/{{ item.section.id }}/">
+                <span class="section-number">{{ item.section.number }}</span>
+                {{ item.section.title }}
+            </a>
+            <span class="preview-index-chapter">{{ item.chapter.short_title }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>This pull request does not change any page of the website.</p>
+    {% endif %}
+</div>
+{% endblock %}

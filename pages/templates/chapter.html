@@ -27,7 +27,7 @@
                     {% if section.parent %}
                     <span class="section-tree-connector"></span>
                     {% endif %}
-                    <a href="/{{ chapter.id }}/{{ section.id }}/"
+                    <a href="{{ base_path }}/{{ chapter.id }}/{{ section.id }}/"
                        class="section-link {% if current_section == section.id %}active{% endif %}{% if section.is_group %} is-group{% endif %}{% if section.parent %} is-child{% endif %}"
                        data-section-id="{{ section.id }}"
                        data-section-number="{{ section.number }}"
@@ -50,7 +50,7 @@
             <ul class="subsection-list" id="subsection-list">
                 {% for sub in subsections %}
                 <li>
-                    <a href="/{{ chapter.id }}/{{ current_section }}/{{ sub.id }}/"
+                    <a href="{{ base_path }}/{{ chapter.id }}/{{ current_section }}/{{ sub.id }}/"
                        class="subsection-link {% if current_subsection == sub.id %}active{% endif %}"
                        data-subsection-id="{{ sub.id }}">
                         <span class="subsection-title">{{ sub.title }}</span>
@@ -91,14 +91,14 @@
         <nav class="breadcrumb" aria-label="Breadcrumb">
             <ol class="breadcrumb-list">
                 <li class="breadcrumb-item">
-                    <a href="/" class="breadcrumb-link">Content</a>
+                    <a href="{{ base_path }}/" class="breadcrumb-link">Content</a>
                 </li>
                 <li class="breadcrumb-item">
-                    <a href="/{{ chapter.id }}/" class="breadcrumb-link">{{ chapter.short_title }}</a>
+                    <a href="{{ base_path }}/{{ chapter.id }}/" class="breadcrumb-link">{{ chapter.short_title }}</a>
                 </li>
                 {% if current_section and section %}
                 <li class="breadcrumb-item">
-                    <a href="/{{ chapter.id }}/{{ current_section }}/" class="breadcrumb-link">{{ section.number }} {{ section.title }}</a>
+                    <a href="{{ base_path }}/{{ chapter.id }}/{{ current_section }}/" class="breadcrumb-link">{{ section.number }} {{ section.title }}</a>
                 </li>
                 {% endif %}
                 {% if current_subsection and current_subsection_data and current_subsection != 'intro' %}
@@ -154,7 +154,7 @@
                     <div class="sections-grid">
                         {% for section in chapter.sections %}
                         {% if not section.is_group %}
-                        <a href="/{{ chapter.id }}/{{ section.id }}/"
+                        <a href="{{ base_path }}/{{ chapter.id }}/{{ section.id }}/"
                            class="section-card section-card-image"
                            data-section-id="{{ section.id }}"
                            data-section-link>
@@ -203,6 +203,7 @@
 
 {% block extra_js %}
 <script src="{% static 'js/chapter-nav.js' %}"></script>
+{% if preview %}<script src="{% static 'js/diff.js' %}"></script>{% endif %}
 
 <!-- Default Statcounter code for ARENA new site https://learn.arena.education/ -->
 <script type="text/javascript">

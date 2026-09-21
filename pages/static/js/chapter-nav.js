@@ -5,6 +5,17 @@
 (function() {
     'use strict';
 
+    // URL prefix of this copy of the site: empty on the live site,
+    // "/pr-preview/pr-<N>" inside a PR preview (set by base.html).
+    const BASE_PATH = window.ARENA_BASE_PATH || '';
+
+    // Path segments after the prefix: [chapterId, sectionId, subsectionId]
+    function pathParts() {
+        let path = window.location.pathname;
+        if (BASE_PATH && path.startsWith(BASE_PATH)) path = path.slice(BASE_PATH.length);
+        return path.split('/').filter(p => p);
+    }
+
     // Cache for loaded sections
     const sectionCache = new Map();
 
@@ -64,8 +75,7 @@
         }
 
         // Get current section/subsection from URL
-        const path = window.location.pathname;
-        const parts = path.split('/').filter(p => p);
+        const parts = pathParts();
         if (parts.length >= 2) {
             currentSectionId = parts[1];
         }
@@ -337,7 +347,7 @@
             currentSubsectionId = data.subsections[0]?.id || null;
 
             // Update URL
-            const newUrl = `/${currentChapterId}/${currentSectionId}/${currentSubsectionId || ''}`;
+            const newUrl = `${BASE_PATH}/${currentChapterId}/${currentSectionId}/${currentSubsectionId || ''}`;
             history.pushState({ chapterId: currentChapterId, sectionId, subsectionId: currentSubsectionId }, '', newUrl);
 
             // Render content
@@ -370,7 +380,7 @@
         currentSubsectionId = subsectionId;
 
         // Update URL
-        const newUrl = `/${currentChapterId}/${currentSectionId}/${subsectionId}/`;
+        const newUrl = `${BASE_PATH}/${currentChapterId}/${currentSectionId}/${subsectionId}/`;
         history.pushState({ chapterId: currentChapterId, sectionId: currentSectionId, subsectionId }, '', newUrl);
 
         // Render subsection content
@@ -391,7 +401,7 @@
         }
 
         // Fetch from API
-        const apiUrl = `/api/${currentChapterId}/${sectionId}/`;
+        const apiUrl = `${BASE_PATH}/api/${currentChapterId}/${sectionId}/`;
         console.log(`[chapter-nav] Fetching section: ${apiUrl}`);
         const response = await fetch(apiUrl);
         if (!response.ok) {
@@ -526,7 +536,7 @@
         // Build HTML for subsection list
         subsectionList.innerHTML = subsections.map(sub => `
             <li>
-                <a href="/${currentChapterId}/${currentSectionId}/${sub.id}/"
+                <a href="${BASE_PATH}/${currentChapterId}/${currentSectionId}/${sub.id}/"
                    class="subsection-link ${sub.id === currentSubsectionId ? 'active' : ''}"
                    data-subsection-id="${sub.id}">
                     <span class="subsection-title">${sub.title}</span>
@@ -560,6 +570,9 @@
 
             contentArea.style.opacity = '1';
             contentArea.style.transition = 'opacity 150ms';
+
+            // Lets the PR-preview diff view (diff.js) follow client-side navigation
+            document.dispatchEvent(new CustomEvent('arena:content-rendered'));
         }, 100);
 
         // Update TOC
@@ -625,7 +638,7 @@
                 </span>`;
 
         return `
-            <a href="/${currentChapterId}/${currentSectionId}/${subsection.id}/"
+            <a href="${BASE_PATH}/${currentChapterId}/${currentSectionId}/${subsection.id}/"
                class="pager-link pager-${direction}"
                rel="${isNext ? 'next' : 'prev'}"
                data-subsection-id="${subsection.id}">
@@ -672,8 +685,7 @@
         const state = e.state;
         if (!state) {
             // No state, parse from URL
-            const path = window.location.pathname;
-            const parts = path.split('/').filter(p => p);
+            const parts = pathParts();
             if (parts.length >= 2 && parts[0] === currentChapterId) {
                 const sectionId = parts[1];
                 const subsectionId = parts[2] || null;

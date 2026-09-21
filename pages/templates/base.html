@@ -16,6 +16,10 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}ARENA{% endblock %}</title>
+    {% if preview %}
+    <meta name="robots" content="noindex, nofollow" />
+    <script>window.ARENA_BASE_PATH = "{{ preview.base_path|escapejs }}";</script>
+    {% endif %}
     {% load static %}
     <link
       rel="icon"
@@ -41,6 +45,26 @@
     {% block extra_css %}{% endblock %}
   </head>
   <body>
+    {% if preview %}
+    <!-- Shown only inside a PR preview (/pr-preview/pr-<N>/...). The diff
+         controls are inert markup: static/js/diff.js owns them. -->
+    <div class="preview-banner" role="alert">
+      <span class="preview-banner-title">
+        ⚠ Preview of pull request #{{ preview.pr }}{% if preview.title %} —
+        <em title="{{ preview.title }}">{{ preview.title }}</em>{% endif %} — this is not the live site.
+      </span>
+      <span class="preview-banner-links">
+        <a href="{{ preview.base_path }}/">Changed pages</a>
+        <a href="/">Go to the live site&nbsp;↗</a>
+        <a href="{{ preview.pr_url }}" target="_blank" rel="noopener noreferrer">Open PR #{{ preview.pr }}&nbsp;↗</a>
+      </span>
+      <span id="diff-controls" class="preview-banner-controls">
+        <label><input type="checkbox" id="diff-toggle" /> diff vs main</label>
+        <label id="diff-sync-label"><input type="checkbox" id="diff-sync" checked /> sync scroll</label>
+        <span id="diff-status"></span>
+      </span>
+    </div>
+    {% endif %}
     <nav class="top-nav">
       <div class="nav-container">
         <a href="/" class="nav-logo">
@@ -56,7 +80,7 @@
             <a href="/" class="nav-link nav-dropdown-trigger">Content</a>
             <div class="nav-dropdown-menu">
               {% for chapter in chapters %}
-              <a href="/{{ chapter.id }}/" class="nav-dropdown-item"
+              <a href="{{ base_path }}/{{ chapter.id }}/" class="nav-dropdown-item"
                 >{{ chapter.title }}</a
               >
               {% endfor %}

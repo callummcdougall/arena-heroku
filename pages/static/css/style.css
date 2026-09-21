@@ -2553,3 +2553,205 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
         display: none;
     }
 }
+
+/* --------------------------------------------------------------------------
+   PR previews (/pr-preview/pr-<N>/...) — banner, landing page, and the
+   "diff vs main" view (static/js/diff.js, ported from iliad-intensive).
+   None of this markup exists on the live site.
+   -------------------------------------------------------------------------- */
+
+.preview-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs) var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: #fbbf24;
+    color: #451a03;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.preview-banner-title {
+    font-weight: 500;
+}
+
+.preview-banner-title em {
+    display: inline-block;
+    max-width: min(60ch, 100%);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.preview-banner a {
+    color: inherit;
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.preview-banner-links,
+.preview-banner-controls {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs) var(--spacing-md);
+}
+
+.preview-banner-controls {
+    font-size: 0.75rem;
+}
+
+.preview-banner-controls label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    cursor: pointer;
+}
+
+#diff-status {
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* Only a section article can be diffed */
+body:not(:has(#content-area article.markdown-content)) #diff-controls {
+    display: none;
+}
+
+#diff-sync-label {
+    display: none;
+}
+
+html.diff-open #diff-sync-label {
+    display: inline-flex;
+}
+
+.preview-index {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--spacing-2xl) var(--spacing-lg);
+}
+
+.preview-index h1 {
+    font-family: var(--font-heading);
+    margin-bottom: var(--spacing-sm);
+}
+
+.preview-index-title {
+    color: var(--color-text-secondary);
+    font-style: italic;
+    margin-bottom: var(--spacing-lg);
+}
+
+.preview-index-list {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--spacing-lg);
+}
+
+.preview-index-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.preview-index-chapter {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+/* Two columns — the live site's article on the left, this PR's on the right —
+   with matched blocks padded into shared rows. */
+.diff-view {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--spacing-xl);
+    align-items: start;
+}
+
+.diff-col {
+    min-width: 0;
+}
+
+.diff-col > .markdown-content {
+    max-width: none;
+}
+
+.diff-col-head {
+    position: sticky;
+    top: var(--nav-height);
+    z-index: 5;
+    background: var(--color-bg);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--spacing-md);
+}
+
+.diff-col-base .diff-col-head { color: #dc2626; }
+.diff-col-pr .diff-col-head { color: #16a34a; }
+
+/* Whole blocks: removed (left) / added (right) / edited (both, tinted, with
+   the changed words marked inside). Translucent, so one set of colours serves
+   both themes. The box-shadow bleeds the tint a few px past the block. */
+.diff-removed { background: rgba(239, 68, 68, 0.22); box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.22); }
+.diff-added { background: rgba(34, 197, 94, 0.22); box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.22); }
+.diff-col-base .diff-modified { background: rgba(239, 68, 68, 0.08); box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08); }
+.diff-col-pr .diff-modified { background: rgba(34, 197, 94, 0.08); box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.08); }
+.diff-removed, .diff-added, .diff-modified { border-radius: 2px; }
+
+/* Blocks that are whole equations get an outline instead of a fill, so the
+   tint does not sit under KaTeX's own strut boxes. */
+.katex-display.diff-removed, .katex-display.diff-added, .katex-display.diff-modified {
+    background: transparent;
+    box-shadow: none;
+    outline: 3px solid;
+    outline-offset: 4px;
+}
+.katex-display.diff-removed { outline-color: rgba(239, 68, 68, 0.6); }
+.katex-display.diff-added { outline-color: rgba(34, 197, 94, 0.6); }
+.diff-col-base .katex-display.diff-modified { outline-color: rgba(239, 68, 68, 0.6); }
+.diff-col-pr .katex-display.diff-modified { outline-color: rgba(34, 197, 94, 0.6); }
+
+/* Word-level marks inside an edited block; inline maths is one token. */
+mark.diff-del { background: rgba(239, 68, 68, 0.45); color: inherit; text-decoration: line-through; }
+mark.diff-ins { background: rgba(34, 197, 94, 0.45); color: inherit; }
+.katex.diff-del { outline: 2px solid #f87171; outline-offset: 2px; border-radius: 2px; }
+.katex.diff-ins { outline: 2px solid #4ade80; outline-offset: 2px; border-radius: 2px; }
+
+/* The blanks that keep matched rows level across the two columns. */
+.diff-spacer {
+    height: 0;
+    margin: 0;
+}
+
+.diff-spacer.diff-gap {
+    background: repeating-linear-gradient(-45deg, transparent 0 6px, var(--color-bg-tertiary) 6px 12px);
+}
+
+/* Sync off: each column scrolls on its own inside a viewport-high frame. */
+html.diff-unsync .diff-view {
+    height: calc(100vh - var(--nav-height) - 2rem);
+    position: sticky;
+    top: calc(var(--nav-height) + 1rem);
+}
+
+html.diff-unsync .diff-col {
+    height: 100%;
+    overflow-y: auto;
+    padding-right: var(--spacing-sm);
+}
+
+html.diff-unsync .diff-col-head {
+    top: 0;
+}
