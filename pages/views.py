@@ -88,8 +88,53 @@ def _fetch_text(url: str) -> str:
         raise
 
 
-def _fetch_content(md_path: str) -> str:
-    """Fetch content for a file path: local ARENA_materials first, then GitHub."""
+def _preview_raw_url(pr: int, path: str) -> str:
+    """
+    Construct the raw URL of a file in a PR preview.
+
+    Previews live on the content repo's `pr-preview` branch, one `pr-<N>/`
+    directory per open PR, written only by that repo's pr-preview workflow
+    (which gates on the PR author). Never read a PR's own ref here: that would
+    render markdown from anyone who opens a PR, on this site's origin.
+    """
+    base = os.environ.get("PR_PREVIEW_RAW_BASE")
+    if not base:
+        owner = os.environ.get("GH_OWNER", "ARENA-education")
+        repo = os.environ.get("GH_REPO", "ARENA_materials")
+        branch = os.environ.get("PR_PREVIEW_BRANCH", "pr-preview")
+        base = f"https://raw.githubusercontent.com/{owner}/{repo}/refs/heads/{branch}"
+    return f"{base.rstrip('/')}/pr-{pr}/{path}"
+
+
+def _get_preview(pr: int) -> dict:
+    """
+    Load a PR preview's manifest (pr-<N>/preview.json) and return the template
+    context describing it. Raises Http404 if there is no preview for this PR.
+    """
+    try:
+        manifest = json.loads(_fetch_text(_preview_raw_url(pr, "preview.json")))
+    except (requests.RequestException, ValueError) as exc:
+        raise Http404(f"No preview for PR #{pr}") from exc
+    owner = os.environ.get("GH_OWNER", "ARENA-education")
+    repo = os.environ.get("GH_REPO", "ARENA_materials")
+    return {
+        "pr": pr,
+        "title": str(manifest.get("title", "")),
+        "pages": [str(p) for p in manifest.get("pages", [])],
+        "base_path": f"/pr-preview/pr-{pr}",
+        "pr_url": f"https://github.com/{owner}/{repo}/pull/{pr}",
+    }
+
+
+def _fetch_content(md_path: str, preview: dict | None = None) -> str:
+    """
+    Fetch content for a file path: local ARENA_materials first, then GitHub.
+
+    In a PR preview, pages the PR regenerated come from the preview; every
+    other page is the same as on main.
+    """
+    if preview is not None and md_path in preview["pages"]:
+        return _fetch_text(_preview_raw_url(preview["pr"], md_path))
     local = _try_read_local_arena(md_path)
     if local is not None:
         return local
@@ -393,12 +438,17 @@ def _parse_subsections(markdown_text: str) -> list[dict]:
     return subsections
 
 
-def _get_context_base() -> dict:
-    """Get base context with chapters list."""
-    return {
+def _get_context_base(preview: dict | None = None) -> dict:
+    """Get base context with chapters list (plus the PR preview, if in one)."""
+    context = {
         "chapters": get_all_chapters(),
         "render_version": _RENDER_VERSION,
     }
+    if preview is not None:
+        context["preview"] = preview
+        # Prefix for in-site links, so navigation stays inside the preview.
+        context["base_path"] = preview["base_path"]
+    return context
 
 
 # Redirects for old chapter1 alignment science URLs (moved to chapter4)
@@ -480,19 +530,29 @@ def planner_view(request):
 
 @require_GET
 @cache_control(public=True, max_age=300)
-def chapter_view(request, chapter_id: str, section_id: str | None = None, subsection_id: str | None = None):
+def chapter_view(
+    request,
+    chapter_id: str,
+    section_id: str | None = None,
+    subsection_id: str | None = None,
+    pr: int | None = None,
+):
     """
     Main chapter view - handles full page loads.
     Renders the chapter template with initial section content.
     JavaScript handles subsequent navigation within the chapter.
+
+    With `pr` set (the /pr-preview/pr-<N>/ routes) the same page is rendered
+    from that PR's preview content instead of main.
     """
+    preview = _get_preview(pr) if pr is not None else None
     chapter = get_chapter(chapter_id)
     if not chapter:
         raise Http404("Chapter not found")
 
     # If no section specified, show chapter overview
     if not section_id:
-        context = _get_context_base()
+        context = _get_context_base(preview)
         context.update(
             {
                 "chapter": {"id": chapter_id, **chapter},
@@ -518,7 +578,7 @@ def chapter_view(request, chapter_id: str, section_id: str | None = None, subsec
             text = _read_local_content(section["local_path"])
         else:
             logger.info("Fetching content for '%s': %s", section_id, section["path"])
-            text = _fetch_content(section["path"])
+            text = _fetch_content(section["path"], preview)
         logger.info("Content loaded for '%s' (%d chars)", section_id, len(text))
         subsections = _parse_subsections(text)
     except Http404 as e:
@@ -554,7 +614,7 @@ def chapter_view(request, chapter_id: str, section_id: str | None = None, subsec
         (s for s in subsections if s["id"] == current_subsection), subsections[0] if subsections else None
     )
 
-    context = _get_context_base()
+    context = _get_context_base(preview)
     context.update(
         {
             "chapter": {"id": chapter_id, **chapter},
@@ -574,11 +634,27 @@ def chapter_view(request, chapter_id: str, section_id: str | None = None, subsec
 
 @require_GET
 @cache_control(public=True, max_age=300)
-def section_api(request, chapter_id: str, section_id: str):
+def preview_index(request, pr: int):
+    """Landing page of a PR preview: links to the pages the PR changes."""
+    preview = _get_preview(pr)
+    changed = []
+    for chapter in get_all_chapters():
+        for section in chapter["sections"]:
+            if section.get("path") in preview["pages"]:
+                changed.append({"chapter": chapter, "section": section})
+    context = _get_context_base(preview)
+    context["changed_sections"] = changed
+    return render(request, "preview_index.html", context)
+
+
+@require_GET
+@cache_control(public=True, max_age=300)
+def section_api(request, chapter_id: str, section_id: str, pr: int | None = None):
     """
     API endpoint to fetch section content as JSON.
     Used by JavaScript for client-side navigation.
     """
+    preview = _get_preview(pr) if pr is not None else None
     chapter = get_chapter(chapter_id)
     if not chapter:
         return JsonResponse({"error": "Chapter not found"}, status=404)
@@ -599,7 +675,7 @@ def section_api(request, chapter_id: str, section_id: str):
                 logger.warning("API: No 'path' key in section: %s", section)
                 raise Http404(f"No path configured for section {section_id}")
             logger.info("API: Fetching content for '%s': %s", section_id, path)
-            text = _fetch_content(path)
+            text = _fetch_content(path, preview)
         logger.info("API: Content loaded for '%s' (%d chars)", section_id, len(text))
         subsections = _parse_subsections(text)
     except Http404 as e:
