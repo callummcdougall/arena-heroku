@@ -107,8 +107,8 @@ Tests: `python3 manage.py test pages`.
 A preview is PR-author-controlled markdown — which may contain raw HTML —
 rendered on this site's origin. That is why the app reads previews **only**
 from the `pr-preview` branch, which only the content repo's workflow writes,
-and only for authors it trusts (members, collaborators, anyone with a PR
-already merged). Do not "simplify" this to reading `refs/pull/<N>/head`
+and only for authors it trusts (members and collaborators, or any PR a
+maintainer has given the `preview` label). Do not "simplify" this to reading `refs/pull/<N>/head`
 directly: raw.githubusercontent.com does serve it, but that would render
 markdown from anyone who opens a PR.
 
