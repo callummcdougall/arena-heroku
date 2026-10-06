@@ -46,6 +46,7 @@ pr-preview branch
 |---|---|
 | `/pr-preview/pr-<N>/…` routes — the chapter pages and the section API again, with a `pr` argument | `pages/urls.py` |
 | `_get_preview()` reads `pr-<N>/preview.json` (404 → no such preview); `_fetch_content()` serves a page from the preview if the manifest lists it, otherwise from main as usual | `pages/views.py` |
+| `_mark_changed_subsections()` flags the subsections whose rendered HTML differs from main's (`changed`), after giving main's text the same Colab-link rewrite; the sidebar tints those, and the sections the PR changes, green | `pages/views.py`, `templates/chapter.html`, `static/js/chapter-nav.js` |
 | `_preview_colab_links()` points the Colab links of the notebooks the manifest lists at the PR's copies | `pages/views.py` |
 | `preview_index` — landing page listing the pages the PR changes | `pages/views.py`, `templates/preview_index.html` |
 | Banner, `noindex`, `window.ARENA_BASE_PATH`; `{{ base_path }}` on in-site links so navigation stays inside the preview | `templates/base.html`, `templates/chapter.html` |
@@ -70,6 +71,14 @@ token; KaTeX's MathML annotation supplies the TeX source), then pad matched
 blocks into shared rows so the two columns scroll together. Solutions
 (`<details>`) that contain a change are opened. **sync scroll** off gives each
 column its own scrollbar.
+
+**hide unchanged** (on by default, remembered per browser) folds the
+article's top-level blocks that match on both sides — paragraphs, headings,
+whole exercise boxes, lists — keeping one block of context beside each
+change. Each run collapses to a strip, one per heading, that names it and
+says how many blocks it holds; clicking a strip opens that run and clicking
+it again folds it back. Untick the box to see everything. This is ILIAD's
+`foldUnchanged`, ported as is.
 
 The site navigates client-side, so the view listens for
 `arena:content-rendered` and rebuilds itself for each subsection. The status

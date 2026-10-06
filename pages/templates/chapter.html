@@ -28,7 +28,8 @@
                     <span class="section-tree-connector"></span>
                     {% endif %}
                     <a href="{{ base_path }}/{{ chapter.id }}/{{ section.id }}/"
-                       class="section-link {% if current_section == section.id %}active{% endif %}{% if section.is_group %} is-group{% endif %}{% if section.parent %} is-child{% endif %}"
+                       class="section-link {% if current_section == section.id %}active{% endif %}{% if section.is_group %} is-group{% endif %}{% if section.parent %} is-child{% endif %}{% if preview and section.path in preview.pages %} preview-changed{% endif %}"
+                       {% if preview and section.path in preview.pages %}title="Changed in this pull request"{% endif %}
                        data-section-id="{{ section.id }}"
                        data-section-number="{{ section.number }}"
                        {% if section.is_group %}data-is-group="true"{% endif %}
@@ -51,7 +52,8 @@
                 {% for sub in subsections %}
                 <li>
                     <a href="{{ base_path }}/{{ chapter.id }}/{{ current_section }}/{{ sub.id }}/"
-                       class="subsection-link {% if current_subsection == sub.id %}active{% endif %}"
+                       class="subsection-link {% if current_subsection == sub.id %}active{% endif %}{% if sub.changed %} preview-changed{% endif %}"
+                       {% if sub.changed %}title="Changed in this pull request"{% endif %}
                        data-subsection-id="{{ sub.id }}">
                         <span class="subsection-title">{{ sub.title }}</span>
                     </a>

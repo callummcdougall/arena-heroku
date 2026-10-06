@@ -35,6 +35,14 @@
  * Solutions (<details>) that contain a change are opened so the change shows.
  * Turning the view off re-renders the article from the preview's HTML.
  *
+ * "hide unchanged" (on): the article's top-level blocks — paragraphs,
+ * headings, whole exercise boxes, lists — that match on both sides fold away,
+ * one block of context kept beside each change, one strip per run of blocks
+ * under a heading, naming it and saying how many blocks it holds. Clicking a
+ * strip unfolds that run; clicking it again folds it back. Unticking the box
+ * shows everything. Folds go in both columns and are levelled like any
+ * matched pair. Also ported from iliad-intensive (foldUnchanged).
+ *
  * The site navigates client-side (chapter-nav.js swaps #content-area), so the
  * view follows the `arena:content-rendered` event rather than page loads.
  */
@@ -43,6 +51,7 @@
 
   var toggle = document.getElementById("diff-toggle");
   var syncBox = document.getElementById("diff-sync");
+  var hideBox = document.getElementById("diff-hide");
   var status = document.getElementById("diff-status");
   var controls = document.getElementById("diff-controls");
   var contentArea = document.getElementById("content-area");
@@ -52,6 +61,7 @@
   var root = document.documentElement;
   var KEY = "arena.diff";
   var SYNC_KEY = "arena.diffSync";
+  var HIDE_KEY = "arena.diffHide";
   var basePath = window.ARENA_BASE_PATH || "";
 
   var view = null;      // the two-column element, while the diff is showing
@@ -320,6 +330,111 @@
     return moved;
   }
 
+  // ------------------------------------------------------------ hide unchanged
+  var CONTEXT = 1;                     // unchanged top-level blocks kept beside a change
+  function isHeading(el) { return /^H[1-6]$/.test(el.tagName); }
+  function topOf(el, root) {
+    while (el && el.parentElement !== root) el = el.parentElement;
+    return el;
+  }
+  // Fold at the level of the article's TOP-LEVEL blocks — a paragraph, a
+  // heading, a whole exercise box, a list — not the leaves inside them, so an
+  // unchanged stretch vanishes with its chrome instead of leaving empty boxes
+  // and lone headings behind. A PR top corresponds to the base top that holds
+  // the other half of any matched leaf pair inside it; a top is foldable when
+  // nothing in it changed. Runs of foldable tops keep CONTEXT blocks beside
+  // each change and fold the rest, one strip per heading (a heading starts a
+  // new strip and names it). The article's two ends have no change beyond
+  // them, so they keep no context. Returns the number of tops hidden; the
+  // strips are pushed onto `pairs` so settle() keeps them level.
+  function foldUnchanged(ops, A, B, pairs, realign, rootA, rootB) {
+    var CHANGED = ".diff-removed, .diff-added, .diff-modified";
+    var changedIn = function (top) { return top.matches(CHANGED) || !!top.querySelector(CHANGED); };
+    var partner = new Map();           // PR top -> base top
+    ops.forEach(function (o) {
+      if (o[0] !== "=") return;
+      var ta = topOf(A[o[1]], rootA), tb = topOf(B[o[2]], rootB);
+      if (ta && tb && !partner.has(tb)) partner.set(tb, ta);
+    });
+    var tops = function (root) {
+      return Array.prototype.filter.call(root.children, function (t) { return !t.classList.contains("diff-spacer"); });
+    };
+    var idxA = new Map();
+    tops(rootA).forEach(function (t, i) { idxA.set(t, i); });
+    var hidden = 0, run = [], lastA = -1, sawChange = false;
+
+    var foldSegment = function (seg) {                 // seg: [[prTop, baseTop], …]
+      var head = isHeading(seg[0][0]) ? seg[0][0].textContent.replace(/\s+/g, " ").trim() : null;
+      var n = seg.length - (head ? 1 : 0);             // blocks besides the heading
+      if (head ? n < 1 : n < 2) return;                // nothing worth a strip
+      var els = [];
+      seg.forEach(function (p) { els.push(p[0], p[1]); });
+      var folded = true;
+      var mk = function (before) {
+        var f = document.createElement("div");
+        f.className = "diff-fold";
+        f.setAttribute("role", "button");
+        f.tabIndex = 0;
+        before.parentNode.insertBefore(f, before);
+        return f;
+      };
+      var fb = mk(seg[0][0]), fa = mk(seg[0][1]);
+      // The strip stays either way and toggles the run: the same click that
+      // shows the blocks hides them again. Both columns' strips are a matched
+      // pair, so their row is re-levelled with the rest after each toggle.
+      var apply = function () {
+        els.forEach(function (el) { el.classList.toggle("diff-hidden", folded); });
+        var text = "⋯ " + (head ? "§ " + head + " — " : "") +
+          n + " unchanged block" + (n === 1 ? "" : "s") +
+          (folded ? " — click to show" : " shown — click to hide");
+        fa.textContent = text; fb.textContent = text;
+        fa.classList.toggle("diff-fold-open", !folded);
+        fb.classList.toggle("diff-fold-open", !folded);
+      };
+      var toggleRun = function () { folded = !folded; apply(); realign(); };
+      apply();
+      [fa, fb].forEach(function (f) {
+        f.addEventListener("click", toggleRun);
+        f.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleRun(); }
+        });
+      });
+      pairs.push([fa, fb]);
+      hidden += seg.length;
+    };
+    var flush = function (atEnd) {
+      // Context after a change is worth keeping when it is prose; a heading
+      // there only names the next stretch, which its strip does already, so
+      // it folds with it. Context BEFORE a change stays whatever it is — a
+      // heading there says which part the change sits in.
+      var lead = !sawChange || (run.length && isHeading(run[0][0])) ? 0 : CONTEXT;
+      var inner = run.slice(lead, run.length - (atEnd ? 0 : CONTEXT));
+      run = [];
+      if (!inner.length) return;
+      var seg = [];
+      inner.forEach(function (p) {
+        if (isHeading(p[0]) && seg.length) { foldSegment(seg); seg = []; }
+        seg.push(p);
+      });
+      foldSegment(seg);
+    };
+    tops(rootB).forEach(function (tb) {
+      var ta = partner.get(tb);
+      // Foldable: unchanged on both sides, and its partner follows the previous
+      // one in the base column, so the two columns fold the same stretch.
+      if (ta && !changedIn(tb) && !changedIn(ta) && idxA.get(ta) > lastA) {
+        run.push([tb, ta]);
+        lastA = idxA.get(ta);
+        return;
+      }
+      flush(false);
+      sawChange = true;
+      if (ta && idxA.has(ta)) lastA = Math.max(lastA, idxA.get(ta));
+    });
+    flush(true);
+    return hidden;
+  }
+
   // ------------------------------------------------------------ build / teardown
   function column(label, cls, content) {
     var col = document.createElement("div");
@@ -365,19 +480,29 @@
       pairs.push([a, b]);
       modified++;
     });
-    say(removed + added + modified
-      ? "−" + removed + " +" + added + " ~" + modified + " blocks"
-      : "no differences in this subsection");
-
     var built = view;
-    var align = function () {
+    var align = function (reset) {
       if (view !== built) return;
+      // Spacers only ever grow, so after a fold is toggled they are re-derived
+      // from a clean slate rather than left over-padded around it.
+      if (reset) Array.prototype.forEach.call(view.querySelectorAll(".diff-spacer"), function (s) { s.remove(); });
+      // settle() accumulates shifts down the column, so the pairs must be in
+      // column order — the folds were appended after the matched pairs.
+      pairs.sort(function (x, y) { return x[0].getBoundingClientRect().top - y[0].getBoundingClientRect().top; });
       settle(pairs, base, article);
       settle(pairs, base, article); // margins that stopped collapsing around new spacers
     };
-    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(align);
+    var hidden = hideBox && hideBox.checked
+      ? foldUnchanged(ops, A, B, pairs, function () { align(true); }, base, article)
+      : 0;
+    say((removed + added + modified
+      ? "−" + removed + " +" + added + " ~" + modified + " blocks"
+      : "no differences in this subsection") + (hidden ? " · " + hidden + " unchanged hidden" : ""));
+
+    var alignGrow = function () { align(false); };
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(alignGrow);
     // Images and lazy layout can land later; one more pass a moment on.
-    setTimeout(align, 1500);
+    setTimeout(alignGrow, 1500);
   }
 
   // Put the article back where it was, rendered afresh. If chapter-nav has
@@ -436,6 +561,16 @@
     if (load(SYNC_KEY) === "0") syncBox.checked = false;
     applySync();
     syncBox.addEventListener("change", applySync);
+  }
+
+  if (hideBox) {
+    if (load(HIDE_KEY) === "0") hideBox.checked = false;
+    // Folding is decided while the view is built, so a change rebuilds it
+    // (both sections are already fetched).
+    hideBox.addEventListener("change", function () {
+      store(HIDE_KEY, hideBox.checked ? "1" : "0");
+      if (view) { teardown(); enable(); }
+    });
   }
 
   if (load(KEY) === "1") { toggle.checked = true; enable(); }

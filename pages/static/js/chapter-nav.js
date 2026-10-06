@@ -537,7 +537,8 @@
         subsectionList.innerHTML = subsections.map(sub => `
             <li>
                 <a href="${BASE_PATH}/${currentChapterId}/${currentSectionId}/${sub.id}/"
-                   class="subsection-link ${sub.id === currentSubsectionId ? 'active' : ''}"
+                   class="subsection-link ${sub.id === currentSubsectionId ? 'active' : ''}${sub.changed ? ' preview-changed' : ''}"
+                   ${sub.changed ? 'title="Changed in this pull request"' : ''}
                    data-subsection-id="${sub.id}">
                     <span class="subsection-title">${sub.title}</span>
                 </a>

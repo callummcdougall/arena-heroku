@@ -2623,12 +2623,37 @@ body:not(:has(#content-area article.markdown-content)) #diff-controls {
     display: none;
 }
 
-#diff-sync-label {
+#diff-sync-label,
+#diff-hide-label {
     display: none;
 }
 
-html.diff-open #diff-sync-label {
+html.diff-open #diff-sync-label,
+html.diff-open #diff-hide-label {
     display: inline-flex;
+}
+
+/* Sidebar: the sections this PR changes, and within one, the subsections
+   whose content differs from main's (views.py sets `changed`). */
+.section-link.preview-changed,
+.subsection-link.preview-changed {
+    background: rgba(34, 197, 94, 0.16);
+    color: var(--color-text);
+}
+
+.section-link.preview-changed:hover,
+.subsection-link.preview-changed:hover {
+    background: rgba(34, 197, 94, 0.26);
+}
+
+.section-link.preview-changed.active,
+.subsection-link.preview-changed.active {
+    background: rgba(34, 197, 94, 0.32);
+    color: var(--color-text);
+}
+
+.subsection-link.preview-changed.active {
+    border-left-color: #16a34a;
 }
 
 .preview-index {
@@ -2737,6 +2762,37 @@ mark.diff-ins { background: rgba(34, 197, 94, 0.45); color: inherit; }
 
 .diff-spacer.diff-gap {
     background: repeating-linear-gradient(-45deg, transparent 0 6px, var(--color-bg-tertiary) 6px 12px);
+}
+
+/* "hide unchanged": a run of blocks identical on both sides is folded into a
+   strip that says how many, in both columns so the rows stay level; a click
+   unfolds that run. */
+.diff-hidden {
+    display: none !important;
+}
+
+.diff-fold {
+    margin: 0.75rem 0;
+    padding: 0.35rem 0.75rem;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.diff-fold:hover,
+.diff-fold:focus-visible {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+/* An unfolded run keeps its strip, drawn solid so it reads as "open". */
+.diff-fold-open {
+    border-style: solid;
+    background: var(--color-bg-tertiary);
 }
 
 /* Sync off: each column scrolls on its own inside a viewport-high frame. */
