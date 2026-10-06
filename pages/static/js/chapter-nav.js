@@ -129,16 +129,24 @@
             sidebar.style.width = savedWidth + 'px';
         }
 
-        // Load collapsed state
+        // Load collapsed state. `resizing` turns the width transition off, so
+        // a page that loads collapsed does not visibly slide shut.
         const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
         if (isCollapsed) {
-            sidebar.classList.add('collapsed');
+            sidebar.classList.add('collapsed', 'resizing');
             if (sidebarToggle) sidebarToggle.classList.add('collapsed');
+            requestAnimationFrame(() => requestAnimationFrame(() => sidebar.classList.remove('resizing')));
         }
 
         // Toggle button click - only expands (button is only visible when collapsed)
         if (sidebarToggle) {
             sidebarToggle.addEventListener('click', expandSidebar);
+        }
+
+        // Collapse button in the sidebar's header
+        const collapseBtn = document.getElementById('sidebar-collapse-btn');
+        if (collapseBtn) {
+            collapseBtn.addEventListener('click', collapseSidebar);
         }
 
         // Resize handle drag
@@ -170,7 +178,7 @@
     }
 
     /**
-     * Collapse sidebar (called when dragged small enough)
+     * Collapse sidebar (called when dragged small enough, or by its collapse button)
      */
     function collapseSidebar() {
         if (!sidebar || !sidebarToggle) return;

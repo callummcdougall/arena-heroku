@@ -175,13 +175,25 @@
             document.documentElement.style.setProperty('--right-sidebar-width', savedWidth + 'px');
         }
 
-        // Always start expanded on page load (don't restore collapsed state)
+        // Stay collapsed across pages until expanded again. `resizing` turns
+        // the slide transition off, so the page does not load with it animating.
+        if (localStorage.getItem('rightSidebarCollapsed') === 'true') {
+            rightSidebar.classList.add('resizing');
+            collapseRightSidebar();
+            requestAnimationFrame(() => requestAnimationFrame(() => rightSidebar.classList.remove('resizing')));
+        }
     }
 
     /**
-     * Set up toggle button - only expands (button only visible when collapsed)
+     * Set up toggle button - only expands (button only visible when collapsed) -
+     * and the collapse button inside the sidebar
      */
     function setupToggle() {
+        const collapseBtn = document.getElementById('right-sidebar-collapse-btn');
+        if (collapseBtn) {
+            collapseBtn.addEventListener('click', collapseRightSidebar);
+        }
+
         if (!rightSidebarToggle) return;
 
         rightSidebarToggle.addEventListener('click', function() {
@@ -208,7 +220,7 @@
      */
     function collapseRightSidebar() {
         rightSidebar.classList.add('collapsed');
-        rightSidebarToggle.classList.add('collapsed');
+        if (rightSidebarToggle) rightSidebarToggle.classList.add('collapsed');
         localStorage.setItem('rightSidebarCollapsed', 'true');
         document.documentElement.style.setProperty('--right-sidebar-width', '0px');
     }
