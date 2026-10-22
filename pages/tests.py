@@ -1,4 +1,5 @@
 import json
+import re
 from unittest import mock
 
 from django.http import Http404
@@ -120,3 +121,62 @@ class PrPreviewTests(SimpleTestCase):
         self.assertIn(f"{COLAB}/main/{RAYS_NOTEBOOK}?t=20260901", html)
         for marker in ("preview-banner", "js/diff.js", "ARENA_BASE_PATH =", "noindex"):
             self.assertNotIn(marker, html)
+
+
+class DetailsBlockTests(SimpleTestCase):
+    """`<details>` dropdowns, including dropdowns nested inside a dropdown."""
+
+    NESTED = (
+        "<details>\n<summary>Outer</summary>\n\nOuter **before**.\n\n"
+        "<details>\n<summary>Inner</summary>\n\nInner **bold**.\n</details>\n\n"
+        "Outer **after**.\n</details>\n\nAfter the dropdown.\n"
+    )
+
+    def outermost_details(self, html: str) -> str:
+        """The first <details> element of `html`, matched by nesting depth."""
+        depth = 0
+        for m in re.finditer(r"<(/?)details\b[^>]*>", html):
+            depth += -1 if m.group(1) else 1
+            if depth == 0:
+                return html[: m.end()]
+        self.fail(f"unclosed <details> in {html!r}")
+
+    def test_nested_dropdown_stays_inside_its_parent(self):
+        html = views._render_markdown(self.NESTED)
+        self.assertEqual(html.count("<details>"), 2)
+        self.assertEqual(html.count("</details>"), 2)
+        outer = self.outermost_details(html[html.index("<details>"):])
+        # The parent's text after the inner dropdown is still inside the parent, as its own paragraph (the
+        # parent's </details> used to end up inside that paragraph: "<p>Outer ... </details></p>")...
+        self.assertIn("<p>Outer <strong>after</strong>.</p>", outer)
+        self.assertNotIn("</details></p>", html)
+        # ...and the page text after the dropdown is not.
+        self.assertNotIn("After the dropdown.", outer)
+        self.assertIn("<p>After the dropdown.</p>", html)
+
+    def test_markdown_inside_a_nested_dropdown_is_rendered(self):
+        html = views._render_markdown(self.NESTED)
+        self.assertIn("Inner <strong>bold</strong>.", html)
+        self.assertNotIn("**", html)
+        self.assertNotIn("DETAILSBLOCK", html)
+
+    def test_single_dropdown(self):
+        html = views._render_markdown("<details>\n<summary>Hint</summary>\n\nUse **this**.\n</details>\n")
+        self.assertIn("<summary>Hint</summary>", html)
+        self.assertIn("Use <strong>this</strong>.", html)
+        self.assertEqual(html.count("</details>"), 1)
+
+    def test_unclosed_dropdown_runs_to_the_end(self):
+        html = views._render_markdown("<details>\n<summary>Oops</summary>\n\nNo **closing** tag.\n")
+        self.assertIn("No <strong>closing</strong> tag.", html)
+        self.assertEqual(html.count("</details>"), 1)
+        self.assertNotIn("DETAILSBLOCK", html)
+
+    def test_dropdowns_after_an_unclosed_one_are_still_rendered(self):
+        text = (
+            "<details>\n<summary>Never closed</summary>\n\nOops.\n\n"
+            "<details>\n<summary>Later</summary>\n\nLater **bold**.\n</details>\n"
+        )
+        html = views._render_markdown(text)
+        self.assertIn("Later <strong>bold</strong>.", html)
+        self.assertEqual(html.count("<details>"), html.count("</details>"))
