@@ -1,4 +1,6 @@
+import io
 import json
+import zipfile
 from unittest import mock
 
 from django.http import Http404
@@ -120,3 +122,46 @@ class PrPreviewTests(SimpleTestCase):
         self.assertIn(f"{COLAB}/main/{RAYS_NOTEBOOK}?t=20260901", html)
         for marker in ("preview-banner", "js/diff.js", "ARENA_BASE_PATH =", "noindex"):
             self.assertNotIn(marker, html)
+
+
+class PaperDownloadTests(SimpleTestCase):
+    @mock.patch.object(views, "_read_local_paper", return_value="Paper text")
+    @mock.patch.dict(views.SECTION_PAPERS, {"test_section": [{"local": "paper.txt", "title": "Test Paper"}]}, clear=True)
+    def test_chapter_filename_and_zip_content(self, *_):
+        response = self.client.post(
+            "/api/download-papers/",
+            data=json.dumps({"section_ids": ["test_section"], "chapter_id": "chapter1_transformer_interp"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response["Content-Disposition"],
+            'attachment; filename="arena_chapter1_transformer_interp_papers.zip"',
+        )
+        with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
+            self.assertEqual(archive.namelist(), ["Test Paper.txt"])
+
+    @mock.patch.object(views, "_read_local_paper", return_value="Paper text")
+    @mock.patch.dict(views.SECTION_PAPERS, {"test_section": [{"local": "paper.txt", "title": "Test Paper"}]}, clear=True)
+    def test_legacy_request_keeps_generic_filename(self, *_):
+        response = self.client.post(
+            "/api/download-papers/",
+            data=json.dumps({"section_ids": ["test_section"]}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Disposition"], 'attachment; filename="arena_papers.zip"')
+
+    @mock.patch.object(views, "_read_local_paper", return_value="Paper text")
+    @mock.patch.dict(views.SECTION_PAPERS, {"test_section": [{"local": "paper.txt", "title": "Test Paper"}]}, clear=True)
+    def test_chapter_id_is_safe_for_a_filename(self, *_):
+        response = self.client.post(
+            "/api/download-papers/",
+            data=json.dumps({"section_ids": ["test_section"], "chapter_id": "../Chapter 1/Transformers"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response["Content-Disposition"],
+            'attachment; filename="arena_chapter_1_transformers_papers.zip"',
+        )
