@@ -1144,8 +1144,7 @@ ${file.content}
         });
     }
 
-    const NO_COPY_MESSAGE = 'Reference only: this code is already provided (e.g. in a utils/game module) \u2014 ' +
-        "don't copy it into your exercises file";
+    const NO_COPY_MESSAGE = "Reference only: Don't copy this code into your exercises file.";
     let noCopyTooltipCount = 0;
 
     /**
