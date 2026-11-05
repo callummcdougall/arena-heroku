@@ -1148,16 +1148,10 @@ ${file.content}
     let noCopyTooltipCount = 0;
 
     /**
-     * Mark a reference-only code block: an always-visible "Reference only" label, plus a crossed-out copy icon in place
-     * of the copy button. The icon is a focusable button (aria-disabled) whose tooltip shows on hover, keyboard focus
+     * Mark a reference-only code block: a crossed-out copy icon in place of the copy button. The icon is a focusable button (aria-disabled) whose tooltip shows on hover, keyboard focus
      * and click/tap; clicking it never touches the clipboard.
      */
     function addNoCopyMarker(block) {
-        const label = document.createElement('span');
-        label.className = 'no-copy-label';
-        label.textContent = 'Reference only';
-        block.insertBefore(label, block.firstChild);
-
         const tooltipId = `no-copy-tooltip-${++noCopyTooltipCount}`;
         const btn = document.createElement('button');
         btn.type = 'button';

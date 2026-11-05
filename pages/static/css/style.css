@@ -55,10 +55,6 @@
     --color-primary: #3b82f6;
     --color-primary-hover: #2563eb;
 
-    /* Reference-only (no-copy) code blocks */
-    --color-no-copy-accent: #d97706;
-    --color-no-copy-label-bg: #fef3c7;
-    --color-no-copy-label-text: #92400e;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -82,10 +78,6 @@
     --color-primary: #e0e0e0;
     --color-primary-hover: #ffffff;
 
-    /* Reference-only (no-copy) code blocks */
-    --color-no-copy-accent: #b45309;
-    --color-no-copy-label-bg: #2b1f0e;
-    --color-no-copy-label-text: #fbbf24;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
@@ -1847,42 +1839,10 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     height: 14px;
 }
 
-/* Reference-only code blocks (```{.python .no-copy} in the markdown): dashed amber left border, a "Reference only"
-   label sitting on the top border, and a crossed-out copy icon (see addNoCopyMarker in right-sidebar.js). The
-   `.markdown-content` selector beats the borderless `details .codehilite` rule further down. */
-.codehilite.no-copy,
-.markdown-content .codehilite.no-copy {
-    border-left: 3px dashed var(--color-no-copy-accent);
-    margin-top: calc(var(--spacing-md) + 0.5rem);
-}
-
-.markdown-content details .codehilite.no-copy {
-    padding-left: var(--spacing-md);
-}
-
-.no-copy-label {
-    position: absolute;
-    top: 0;
-    right: calc(var(--spacing-sm) + 36px);
-    transform: translateY(-50%);
-    padding: 1px 8px;
-    font-family: var(--font-body);
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    line-height: 1.5;
-    color: var(--color-no-copy-label-text);
-    background: var(--color-no-copy-label-bg);
-    border: 1px solid var(--color-no-copy-accent);
-    border-radius: 999px;
-    pointer-events: none;
-    user-select: none;
-    z-index: 1;
-}
-
+/* Reference-only code blocks (```{.python .no-copy} in the markdown): the copy button is crossed out, copies
+   nothing, and explains why in a tooltip (see addNoCopyMarker in right-sidebar.js). */
 .code-copy-button.no-copy-button {
     cursor: not-allowed;
-    opacity: 0.55;
 }
 
 .codehilite:hover .code-copy-button.no-copy-button,
@@ -1891,13 +1851,8 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     opacity: 1;
 }
 
-.code-copy-button.no-copy-button:hover {
-    color: var(--color-no-copy-accent);
-    border-color: var(--color-no-copy-accent);
-}
-
 .code-copy-button.no-copy-button:focus-visible {
-    outline: 2px solid var(--color-no-copy-accent);
+    outline: 2px solid var(--color-text-muted);
     outline-offset: 2px;
 }
 
@@ -1907,7 +1862,7 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 }
 
 .no-copy-button .no-copy-slash {
-    stroke: var(--color-no-copy-accent);
+    stroke: currentColor;
     stroke-width: 2;
 }
 
@@ -1926,7 +1881,7 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     white-space: normal;
     color: var(--color-text);
     background: var(--color-surface);
-    border: 1px solid var(--color-no-copy-accent);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-md);
     visibility: hidden;
