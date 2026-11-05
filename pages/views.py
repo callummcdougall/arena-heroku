@@ -29,8 +29,11 @@ logger = logging.getLogger(__name__)
 # Directory for local content files (group overview pages)
 CONTENT_DIR = Path(__file__).parent / "content"
 
-# Local ARENA_materials repo paths (for development) - same layout as chapters.py
+# Local ARENA_materials repo paths (for development) - same layout as chapters.py.
+# ARENA_MATERIALS_DIR (if set) points at a checkout anywhere on disk and wins;
+# otherwise an ARENA_materials/ directory next to this repo is used.
 LOCAL_ARENA_PATHS = [
+    *([Path(os.environ["ARENA_MATERIALS_DIR"]).expanduser()] if os.environ.get("ARENA_MATERIALS_DIR") else []),
     Path(__file__).parent.parent.parent.parent / "ARENA_materials",
     Path(__file__).parent.parent.parent / "ARENA_materials",
 ]
@@ -69,7 +72,10 @@ def _try_read_local_arena(md_path: str) -> str | None:
     """Try to read a file from the local ARENA_materials directory (for development)."""
     for base in LOCAL_ARENA_PATHS:
         filepath = base / md_path
-        if filepath.exists():
+        # Never read outside the checkout (md_path can come from /api/raw/<path>)
+        if not filepath.resolve().is_relative_to(base.resolve()):
+            continue
+        if filepath.is_file():
             logger.info("Reading from local ARENA_materials: %s", filepath)
             return filepath.read_text(encoding="utf-8")
     return None
