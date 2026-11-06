@@ -294,6 +294,33 @@ def _restore_latex(html_text: str, placeholders: dict) -> str:
     return html_text
 
 
+_DETAILS_TAG = re.compile(r"<(/?)details\b[^>]*>", re.IGNORECASE)
+
+
+def _top_level_details_spans(text: str) -> list[tuple[int, int]]:
+    """
+    (start, end) of each outermost <details>...</details> block in `text`.
+
+    Each </details> is paired with the most recent unpaired <details>, so a
+    dropdown inside another dropdown stays part of its parent (a non-greedy
+    regex would end the parent at the inner dropdown's </details>). A <details>
+    that is never closed runs to the end of `text`, as it would in the browser.
+    A stray </details> is ignored.
+    """
+    pairs, open_starts = [], []
+    for m in _DETAILS_TAG.finditer(text):
+        if not m.group(1):  # <details ...>
+            open_starts.append(m.start())
+        elif open_starts:  # </details>
+            pairs.append((open_starts.pop(), m.end()))
+    pairs += [(start, len(text)) for start in open_starts]  # never closed
+    spans = []
+    for start, end in sorted(pairs):
+        if not spans or start >= spans[-1][1]:  # not inside the previous outermost block
+            spans.append((start, end))
+    return spans
+
+
 def _preprocess_details_blocks(text: str) -> tuple[str, dict]:
     """
     Pre-render <details> block content before the main markdown call.
@@ -304,27 +331,32 @@ def _preprocess_details_blocks(text: str) -> tuple[str, dict]:
     and no italic/bold is accidentally applied inside code), and replaces the
     block with a placeholder. The rendered HTML is restored after the main call.
 
+    Dropdowns nested inside a dropdown are handled recursively: each block's
+    content is pre-processed the same way before it is rendered.
+
     Returns (modified_text, placeholders_dict).
     """
     placeholders: dict[str, str] = {}
 
-    def render_and_replace(match: re.Match) -> str:
-        full_match = match.group(0)
-        opening_tag = match.group(1)  # e.g. "<details>" or "<details open>"
+    def render_block(full_match: str) -> str:
+        opening_tag = _DETAILS_TAG.match(full_match).group(0)  # e.g. "<details>" or "<details open>"
         summary_match = re.search(r"<summary[^>]*>(.*?)</summary>", full_match, re.DOTALL)
         if not summary_match:
             return full_match
 
         summary_tag = summary_match.group(0)
         content_start = full_match.find("</summary>") + len("</summary>")
-        content_end = full_match.rfind("</details>")
-        if content_end == -1:
-            return full_match
+        closed = re.search(r"</details>\s*$", full_match, re.IGNORECASE)
+        content_end = closed.start() if closed else len(full_match)  # an unclosed block runs to the end
 
         content = full_match[content_start:content_end].strip()
 
         # Handle blockquotes inside details
         content = content.replace("<blockquote>", '<blockquote markdown="1">')
+
+        # Render any dropdowns nested in this one first (they'd be raw HTML to the
+        # md.markdown() call below, so the markdown inside them would not render)
+        content, nested = _preprocess_details_blocks(content)
 
         # Render the content with markdown (same extensions minus toc, since
         # headers inside <details> shouldn't appear in the page-level TOC)
@@ -341,13 +373,21 @@ def _preprocess_details_blocks(text: str) -> tuple[str, dict]:
             },
         )
 
+        for nested_placeholder, nested_html in nested.items():
+            rendered_content = rendered_content.replace(f"<p>{nested_placeholder}</p>", nested_html)
+            rendered_content = rendered_content.replace(nested_placeholder, nested_html)
+
         details_html = f"{opening_tag}\n{summary_tag}\n{rendered_content}\n</details>"
         placeholder = f"DETAILSBLOCK{uuid.uuid4().hex}END"
         placeholders[placeholder] = details_html
         return placeholder
 
-    text = re.sub(r"(<details[^>]*>).*?</details>", render_and_replace, text, flags=re.DOTALL)
-    return text, placeholders
+    pieces, last = [], 0
+    for start, end in _top_level_details_spans(text):
+        pieces += [text[last:start], render_block(text[start:end])]
+        last = end
+    pieces.append(text[last:])
+    return "".join(pieces), placeholders
 
 
 def _render_markdown(text: str) -> str:
