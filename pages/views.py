@@ -1124,10 +1124,12 @@ def download_papers_api(request):
 
     Accepts JSON body with:
     - section_ids: list of section IDs to get papers for
+    - chapter_id: optional chapter ID for the download filename
     """
     try:
         data = _json_object(request.body)
         section_ids = data.get("section_ids", [])
+        chapter_id = data.get("chapter_id", "")
 
         if not section_ids:
             return JsonResponse({"error": "No sections provided"}, status=400)
@@ -1181,7 +1183,11 @@ def download_papers_api(request):
 
         # Return ZIP file
         response = HttpResponse(zip_buffer.getvalue(), content_type="application/zip")
-        response["Content-Disposition"] = 'attachment; filename="arena_papers.zip"'
+        safe_chapter_id = ""
+        if isinstance(chapter_id, str):
+            safe_chapter_id = re.sub(r"[^a-z0-9]+", "_", chapter_id.lower()).strip("_")[:80]
+        filename = f"arena_{safe_chapter_id}_papers.zip" if safe_chapter_id else "arena_papers.zip"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
 
     except json.JSONDecodeError:

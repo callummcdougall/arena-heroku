@@ -664,7 +664,7 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ section_ids: selectedSectionIds })
+            body: JSON.stringify({ section_ids: selectedSectionIds, chapter_id: currentChapter.id })
         });
 
         if (!response.ok) {
@@ -678,7 +678,9 @@
 
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'arena_papers.zip';
+        const disposition = response.headers.get('Content-Disposition') || '';
+        const filename = disposition.match(/filename="([^"]+)"/)?.[1];
+        a.download = filename || 'arena_papers.zip';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
