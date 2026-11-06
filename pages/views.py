@@ -43,7 +43,7 @@ SUBSECTION_DELIMITER = "=== NEW CHAPTER ==="
 
 # Bump this string whenever _render_markdown logic changes so that cached
 # entries from a previous code version are automatically invalidated.
-_RENDER_VERSION = "2026-03-02-v3-details-prerender"
+_RENDER_VERSION = "2026-11-06-v4-list-blank-line"
 
 # Render cache: sha256(version + raw_text) -> parsed subsections list. Bounded:
 # every edit to a page (and every PR preview) adds a new key, and nothing else
@@ -255,6 +255,80 @@ def _preprocess_exercise_blocks(text: str) -> str:
     return re.sub(pattern, replace_block, text, flags=re.MULTILINE)
 
 
+_LIST_ITEM_RE = re.compile(r"^ {0,3}(?:[*+-]|\d+[.)])\s+\S")
+# Lines that can't be paragraph text: a list after one of these needs no fix.
+_NON_PARAGRAPH_RE = re.compile(r"^\s*(?:#|\||<|```|~~~|\$\$|-{3,}\s*$|={3,}\s*$|\*{3,}\s*$)")
+_BLOCKQUOTE_PREFIX_RE = re.compile(r"^((?:> ?)+)")
+
+
+def _split_blockquote(line: str) -> tuple[str, str]:
+    """Split a line into its blockquote depth marker (e.g. ">>") and its body."""
+    m = _BLOCKQUOTE_PREFIX_RE.match(line)
+    prefix = m.group(1) if m else ""
+    return prefix.replace(" ", ""), line[len(prefix):]
+
+
+def _add_blank_line_before_lists(text: str) -> str:
+    """
+    Insert a blank line between a paragraph and a list that directly follows it.
+
+    CommonMark (GitHub, Jupyter, VS Code) lets a list interrupt a paragraph:
+
+        Some notes:
+        * first point
+
+    renders as a paragraph then a list. Python-Markdown doesn't: it needs a
+    blank line first, otherwise the "* first point" lines are folded into the
+    paragraph as literal text. The ARENA material is written (and previewed)
+    as CommonMark, so we add the blank line here. Also handles the same case
+    inside blockquotes ("> Notes:\n> - point"). Leaves alone: code fences,
+    $$ maths, HTML comments, raw <pre> blocks, and hard-wrapped list items
+    (whose continuation line happens to precede the next item).
+    """
+    lines = text.split("\n")
+    out: list[str] = []
+    in_fence = in_math = in_comment = in_pre = False
+    for i, line in enumerate(lines):
+        quote, body = _split_blockquote(line)
+        stripped = body.strip()
+        if in_comment:
+            in_comment = "-->" not in line
+        elif in_pre:
+            in_pre = "</pre>" not in line
+        elif not in_fence and re.match(r"<pre[\s>]", stripped):
+            in_pre = "</pre>" not in line
+        elif stripped.startswith(("```", "~~~")) and not in_math:
+            in_fence = not in_fence
+        elif in_fence:
+            pass
+        elif stripped.count("$$") % 2 == 1:
+            in_math = not in_math
+        elif "<!--" in line and "-->" not in line.split("<!--", 1)[1]:
+            in_comment = True
+        elif not in_math and i > 0 and _LIST_ITEM_RE.match(body) and _list_interrupts_paragraph(lines, i, quote):
+            out.append(quote)
+        out.append(line)
+    return "\n".join(out)
+
+
+def _list_interrupts_paragraph(lines: list[str], i: int, quote: str) -> bool:
+    """Is lines[i] (a list item) directly preceded by plain paragraph text at the same quote depth?"""
+    prev_quote, prev = _split_blockquote(lines[i - 1])
+    if prev_quote != quote or not prev.strip() or _LIST_ITEM_RE.match(prev) or _NON_PARAGRAPH_RE.match(prev):
+        return False
+    if prev.startswith(("    ", "\t")):
+        return False
+    # Walk up the paragraph: if it is the wrapped continuation of a list item,
+    # this is just the next item of that list.
+    for j in range(i - 1, -1, -1):
+        q, b = _split_blockquote(lines[j])
+        if q != quote or not b.strip():
+            return True
+        if _LIST_ITEM_RE.match(b) or b.startswith(("    ", "\t")):
+            return False
+    return True
+
+
 def _protect_latex(text: str) -> tuple[str, dict]:
     """
     Protect LaTeX blocks from markdown processing by replacing with placeholders.
@@ -357,6 +431,9 @@ def _render_markdown(text: str) -> str:
 
     # Pre-process to handle exercise info blocks
     text = _preprocess_exercise_blocks(text)
+
+    # Python-Markdown needs a blank line before a list that follows a paragraph
+    text = _add_blank_line_before_lists(text)
 
     # Enable markdown processing inside HTML blockquotes
     text = text.replace("<blockquote>", '<blockquote markdown="1">')
