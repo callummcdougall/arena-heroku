@@ -55,6 +55,7 @@
     --color-primary: #3b82f6;
     --color-primary-hover: #2563eb;
 
+
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -76,6 +77,7 @@
 
     --color-primary: #e0e0e0;
     --color-primary-hover: #ffffff;
+
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
@@ -1835,6 +1837,70 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
 .code-copy-button svg {
     width: 14px;
     height: 14px;
+}
+
+/* Reference-only code blocks (```{.python .no-copy} in the markdown): the copy button is crossed out, copies
+   nothing, and explains why in a tooltip (see addNoCopyMarker in right-sidebar.js). */
+.code-copy-button.no-copy-button {
+    cursor: not-allowed;
+}
+
+.codehilite:hover .code-copy-button.no-copy-button,
+.code-copy-button.no-copy-button:focus-visible,
+.code-copy-button.no-copy-button.show-tooltip {
+    opacity: 1;
+}
+
+.code-copy-button.no-copy-button:focus-visible {
+    outline: 2px solid var(--color-text-muted);
+    outline-offset: 2px;
+}
+
+.code-copy-button.no-copy-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.no-copy-button .no-copy-slash {
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+.no-copy-tooltip {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: max-content;
+    max-width: min(320px, 70vw);
+    padding: 6px 10px;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.45;
+    text-align: left;
+    white-space: normal;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.no-copy-button:hover .no-copy-tooltip,
+.no-copy-button:focus-visible .no-copy-tooltip,
+.no-copy-button.show-tooltip .no-copy-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.no-copy-button.tooltip-dismissed .no-copy-tooltip {
+    visibility: hidden;
+    opacity: 0;
 }
 
 .codehilite pre {

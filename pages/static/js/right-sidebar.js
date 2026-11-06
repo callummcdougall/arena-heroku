@@ -1091,6 +1091,12 @@ ${file.content}
             // Skip if already has a copy button
             if (block.querySelector('.code-copy-button')) return;
 
+            // Reference-only blocks (```{.python .no-copy} in the markdown) get a crossed-out button that copies nothing
+            if (block.classList.contains('no-copy')) {
+                addNoCopyMarker(block);
+                return;
+            }
+
             const copyBtn = document.createElement('button');
             copyBtn.className = 'code-copy-button';
             copyBtn.title = 'Copy code';
@@ -1139,6 +1145,57 @@ ${file.content}
 
             block.appendChild(copyBtn);
         });
+    }
+
+    const NO_COPY_MESSAGE = "Reference only: Don't copy this code into your exercises file.";
+    let noCopyTooltipCount = 0;
+
+    /**
+     * Mark a reference-only code block: a crossed-out copy icon in place of the copy button. The icon is a focusable button (aria-disabled) whose tooltip shows on hover, keyboard focus
+     * and click/tap; clicking it never touches the clipboard.
+     */
+    function addNoCopyMarker(block) {
+        const tooltipId = `no-copy-tooltip-${++noCopyTooltipCount}`;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'code-copy-button no-copy-button';
+        btn.setAttribute('aria-disabled', 'true');
+        btn.setAttribute('aria-label', 'Copy disabled: reference-only code');
+        btn.setAttribute('aria-describedby', tooltipId);
+        btn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <g transform="translate(6 6) scale(0.5)" stroke-width="3.2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </g>
+                <circle class="no-copy-slash" cx="12" cy="12" r="10"></circle>
+                <line class="no-copy-slash" x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+            </svg>
+            <span class="no-copy-tooltip" role="tooltip" id="${tooltipId}">${NO_COPY_MESSAGE}</span>
+        `;
+
+        let hideTimer = null;
+        btn.addEventListener('click', function(e) {
+            // Deliberately copies nothing: just (re)show the explanation, which also helps on touch devices
+            e.preventDefault();
+            e.stopPropagation();
+            btn.classList.remove('tooltip-dismissed');
+            btn.classList.add('show-tooltip');
+            clearTimeout(hideTimer);
+            hideTimer = setTimeout(() => btn.classList.remove('show-tooltip'), 2500);
+        });
+        // Escape dismisses the tooltip (WCAG 1.4.13); it comes back on the next hover / focus
+        btn.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                btn.classList.remove('show-tooltip');
+                btn.classList.add('tooltip-dismissed');
+            }
+        });
+        const reset = () => btn.classList.remove('show-tooltip', 'tooltip-dismissed');
+        btn.addEventListener('blur', reset);
+        btn.addEventListener('mouseleave', reset);
+
+        block.appendChild(btn);
     }
 
     // Expose globally so it can be called after AJAX content loads
