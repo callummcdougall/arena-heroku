@@ -259,6 +259,11 @@ def _protect_latex(text: str) -> tuple[str, dict]:
     """
     Protect LaTeX blocks from markdown processing by replacing with placeholders.
     Returns the modified text and a dict mapping placeholders to original LaTeX.
+
+    The LaTeX is HTML-escaped when it is put back, so `<`, `>` and `&` reach the
+    page as text: unescaped, `x_{<t}` makes the browser start an HTML tag at `<t`,
+    which swallows the rest of the formula and the text after it. KaTeX reads the
+    page's text, so it still sees the original `<`.
     """
     placeholders = {}
 
@@ -266,7 +271,7 @@ def _protect_latex(text: str) -> tuple[str, dict]:
     def replace_display(match):
         placeholder = f"LATEXDISPLAY{uuid.uuid4().hex}ENDLATEX"
         # Wrap in a div with class for proper styling
-        content = match.group(1)
+        content = html.escape(match.group(1), quote=False)
         placeholders[placeholder] = f'<div class="katex-display-wrapper">$${content}$$</div>'
         return placeholder
 
@@ -275,7 +280,7 @@ def _protect_latex(text: str) -> tuple[str, dict]:
     # Protect inline math ($...$) - but not $$ which we already handled
     def replace_inline(match):
         placeholder = f"LATEXINLINE{uuid.uuid4().hex}ENDLATEX"
-        content = match.group(1)
+        content = html.escape(match.group(1), quote=False)
         placeholders[placeholder] = f"${content}$"
         return placeholder
 
