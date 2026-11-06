@@ -173,6 +173,39 @@ class RenderCacheTests(SimpleTestCase):
         self.assertIs(views._parse_subsections(last), views._parse_subsections(last))
 
 
+
+class ListAfterParagraphTests(SimpleTestCase):
+    """Lists written CommonMark-style, with no blank line after the paragraph, still render."""
+
+    def render(self, text):
+        return views._render_markdown(text)
+
+    def test_bullet_list_after_paragraph(self):
+        out = self.render("Some notes:\n* first\n* second\n")
+        self.assertIn("<p>Some notes:</p>", out)
+        self.assertIn("<li>first</li>", out)
+
+    def test_numbered_list_after_paragraph(self):
+        self.assertIn("<ol>", self.render("Steps:\n1. one\n2. two\n"))
+
+    def test_list_after_paragraph_in_blockquote(self):
+        out = self.render("> Scorers take these forms:\n> 1. one\n> 2. two\n")
+        self.assertIn("<li>one</li>", out)
+
+    def test_wrapped_list_item_is_left_alone(self):
+        text = "* first item, which wraps\nonto a second line\n* second item\n"
+        self.assertEqual(views._add_blank_line_before_lists(text), text)
+
+    def test_code_maths_comments_and_pre_are_left_alone(self):
+        for text in [
+            "```\nx = 1\n- y\n```\n",
+            "$$\na\n- b\n$$\n",
+            "<!-- notes:\n* hidden\n-->\n",
+            "<pre>Rollouts: 100\n0. [setup] text\n</pre>\n",
+        ]:
+            self.assertEqual(views._add_blank_line_before_lists(text), text)
+
+
 @override_settings(STORAGES=PLAIN_STATIC)
 @mock.patch.object(views, "_try_read_local_arena", return_value=None)
 @mock.patch.object(views, "get_all_chapters", return_value=[{"id": "ch0", "section_count": 2, **CHAPTER}])
