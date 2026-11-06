@@ -159,6 +159,11 @@ content repo, never to a fork.
   inside a preview.
 - **Freshness.** raw.githubusercontent.com caches for about five minutes, and
   this app's responses carry `max-age=300`; a push can take that long to show.
+  Each process also keeps what it fetched (`pages/github_cache.py`) and
+  revalidates it at most once a minute. When the content repo removes a
+  preview (PR closed, or no changed page left), the next revalidation gets a
+  404 and drops it, so the preview 404s here too. Other fetch errors (GitHub
+  down, rate limited) keep serving the last copy.
 - **Blocks are matched by content**, so inserting an exercise mid-section shows
   later renumbered headings as edited (true, but noisy). A solution with a
   removed sentence opens on the left only.

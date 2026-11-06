@@ -46,13 +46,15 @@
         transition: opacity var(--transition-fast);
     }
 
-    .modal-chapter-card:hover {
+    .modal-chapter-card:hover,
+    .modal-chapter-card:focus-visible {
         border-color: var(--chapter-color);
         box-shadow: var(--shadow-lg);
         transform: translateY(-2px);
     }
 
-    .modal-chapter-card:hover::before {
+    .modal-chapter-card:hover::before,
+    .modal-chapter-card:focus-visible::before {
         opacity: 1;
     }
 
@@ -198,6 +200,8 @@
     <section class="modal-chapters-grid">
         {% for chapter in chapters %}
         <div class="modal-chapter-card"
+             role="button"
+             tabindex="0"
              style="--chapter-color: {{ chapter.color }}"
              data-modal-chapter-id="{{ chapter.id }}"
              data-chapter-color="{{ chapter.color }}"
@@ -297,7 +301,7 @@
 <template id="modal-sections-{{ chapter.id }}">
     {% for section in chapter.sections %}
     {% if not section.is_group %}
-    <a href="/{{ chapter.id }}/{{ section.id }}/intro" class="section-item" style="--section-number-color: {{ chapter.color }}">
+    <a href="/{{ chapter.id }}/{{ section.id }}/" class="section-item" style="--section-number-color: {{ chapter.color }}">
         <span class="section-number">{{ section.number }}</span>
         <div class="section-info">
             <div class="section-title">{{ section.title }}</div>
@@ -326,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Update modal
             modalTitle.textContent = title;
-            modalGoTo.href = '/' + chapterId;
+            modalGoTo.href = '/' + chapterId + '/';
             modalGoTo.style.background = chapterColor;
 
             // Get sections from template
@@ -338,6 +342,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show modal
             modalOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
+        });
+        // The cards are divs, so open them from the keyboard too
+        card.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
         });
     });
 
@@ -360,21 +371,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
-<!-- Default Statcounter code for ARENA new site https://learn.arena.education/ -->
-<script type="text/javascript">
-    var sc_project = 13206399;
-    var sc_invisible = 1;
-    var sc_security = "42e26c31";
-</script>
-<script type="text/javascript" src="https://www.statcounter.com/counter/counter.js" async></script>
-<noscript>
-    <div class="statcounter">
-        <a title="Web Analytics Made Easy - Statcounter" href="https://statcounter.com/" target="_blank">
-            <img class="statcounter" src="https://c.statcounter.com/13206399/0/42e26c31/1/" alt="Web Analytics Made Easy - Statcounter" referrerPolicy="no-referrer-when-downgrade">
-        </a>
-    </div>
-</noscript>
-<!-- End of Statcounter Code -->
  
 {% endblock %}

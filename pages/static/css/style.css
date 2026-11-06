@@ -1873,6 +1873,15 @@ body:has(.right-sidebar:not(.collapsed)) .main-content:not(:has(.chapter-layout)
     margin: var(--spacing-lg) 0;
 }
 
+/* Embeds (YouTube, plotly/neuronpedia dashboards, videos) carry fixed width
+   attributes of up to ~1500px; keep them inside the content column so the page
+   doesn't scroll sideways (on phones, and on desktop for the widest plots). */
+.markdown-content iframe,
+.markdown-content embed,
+.markdown-content video {
+    max-width: 100%;
+}
+
 .markdown-content hr {
     margin: var(--spacing-2xl) 0;
     border: none;

@@ -92,6 +92,12 @@
                     section: getCurrentSectionMeta(),
                     subsections: subsections,
                 });
+                // A section URL without a subsection (or with an unknown one)
+                // shows the first subsection, as the server does; track it so
+                // the pager and the active subsection link match the content.
+                if (subsections.length && !subsections.some(s => s.id === currentSubsectionId)) {
+                    currentSubsectionId = subsections[0].id;
+                }
             } catch (e) {
                 console.error('Failed to parse subsections data:', e);
             }
@@ -249,12 +255,19 @@
     /**
      * Set up click handlers for navigation links
      */
+    // Clicks that should open the link in a new tab/window (ctrl/cmd/shift-click,
+    // middle button) are left to the browser instead of navigating in place.
+    function isModifiedClick(event) {
+        return event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
+    }
+
     function setupEventListeners() {
         // Section links in sidebar
         if (sectionList) {
             sectionList.addEventListener('click', function(event) {
                 const link = event.target.closest('.section-link');
                 if (!link) return;
+                if (isModifiedClick(event)) return;
 
                 event.preventDefault();
                 const sectionId = link.dataset.sectionId;
@@ -269,6 +282,7 @@
             subsectionContainer.addEventListener('click', function(event) {
                 const link = event.target.closest('.subsection-link');
                 if (!link) return;
+                if (isModifiedClick(event)) return;
 
                 event.preventDefault();
                 const subsectionId = link.dataset.subsectionId;
@@ -285,7 +299,7 @@
                 if (!link) return;
 
                 // Let modified clicks (new tab, etc.) behave normally
-                if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+                if (isModifiedClick(event)) return;
 
                 event.preventDefault();
                 const subsectionId = link.dataset.subsectionId;
@@ -319,12 +333,29 @@
             contentArea.addEventListener('click', function(event) {
                 const card = event.target.closest('[data-section-link]');
                 if (!card) return;
+                if (isModifiedClick(event)) return;
 
                 event.preventDefault();
                 const sectionId = card.dataset.sectionId;
                 if (sectionId) {
                     navigateToSection(sectionId);
                 }
+            });
+
+            // In-page links (#heading) whose heading is in another subsection
+            // of this section: the page only holds one subsection, so switch
+            // to the one containing the heading, then scroll to it.
+            contentArea.addEventListener('click', function(event) {
+                const link = event.target.closest('a[href^="#"]');
+                if (!link || isModifiedClick(event)) return;
+                const targetId = decodeURIComponent(link.getAttribute('href').slice(1));
+                if (!targetId || document.getElementById(targetId)) return;
+                const data = currentSectionId ? sectionCache.get(currentSectionId) : null;
+                const marker = `id="${targetId}"`;
+                const owner = data && data.subsections.find(s => s.html.includes(marker));
+                if (!owner || owner.id === currentSubsectionId) return;
+                event.preventDefault();
+                navigateToSubsection(owner.id, targetId);
             });
         }
     }
@@ -347,7 +378,7 @@
             currentSubsectionId = data.subsections[0]?.id || null;
 
             // Update URL
-            const newUrl = `${BASE_PATH}/${currentChapterId}/${currentSectionId}/${currentSubsectionId || ''}`;
+            const newUrl = `${BASE_PATH}/${currentChapterId}/${currentSectionId}/${currentSubsectionId ? currentSubsectionId + '/' : ''}`;
             history.pushState({ chapterId: currentChapterId, sectionId, subsectionId: currentSubsectionId }, '', newUrl);
 
             // Render content
@@ -368,7 +399,7 @@
     /**
      * Navigate to a different subsection within current section
      */
-    function navigateToSubsection(subsectionId) {
+    function navigateToSubsection(subsectionId, anchorId) {
         if (!currentSectionId) return;
 
         const data = sectionCache.get(currentSectionId);
@@ -380,12 +411,22 @@
         currentSubsectionId = subsectionId;
 
         // Update URL
-        const newUrl = `${BASE_PATH}/${currentChapterId}/${currentSectionId}/${subsectionId}/`;
+        const newUrl = `${BASE_PATH}/${currentChapterId}/${currentSectionId}/${subsectionId}/` +
+            (anchorId ? `#${encodeURIComponent(anchorId)}` : '');
         history.pushState({ chapterId: currentChapterId, sectionId: currentSectionId, subsectionId }, '', newUrl);
 
         // Render subsection content
         renderSubsection(subsection);
         updateActiveStates();
+
+        if (anchorId) {
+            // renderSubsection swaps the content in after a 100ms fade
+            setTimeout(() => {
+                const target = document.getElementById(anchorId);
+                if (target) target.scrollIntoView({ block: 'start' });
+            }, 150);
+            return;
+        }
 
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -539,7 +580,7 @@
                 <a href="${BASE_PATH}/${currentChapterId}/${currentSectionId}/${sub.id}/"
                    class="subsection-link ${sub.id === currentSubsectionId ? 'active' : ''}"
                    data-subsection-id="${sub.id}">
-                    <span class="subsection-title">${sub.title}</span>
+                    <span class="subsection-title">${escapeHtml(sub.title)}</span>
                 </a>
             </li>
         `).join('');
@@ -597,9 +638,15 @@
         // Build HTML for TOC
         tocList.innerHTML = headers.map(h => `
             <li class="toc-item toc-level-${h.level}">
-                <a href="#${h.id}" class="toc-link">${h.title}</a>
+                <a href="#${h.id}" class="toc-link">${escapeHtml(h.title)}</a>
             </li>
         `).join('');
+
+        // Headings can contain $...$ maths; the full-page render covers the
+        // server-rendered TOC, so render this one too.
+        if (window.renderMath) {
+            window.renderMath(tocList);
+        }
     }
 
     /**
@@ -634,7 +681,7 @@
         const text = `
                 <span class="pager-text">
                     <span class="pager-label">${isNext ? 'Next' : 'Previous'}</span>
-                    <span class="pager-title">${subsection.title}</span>
+                    <span class="pager-title">${escapeHtml(subsection.title)}</span>
                 </span>`;
 
         return `
@@ -686,6 +733,12 @@
         if (!state) {
             // No state, parse from URL
             const parts = pathParts();
+            // Back to the chapter overview (server-rendered, no section): the
+            // section content now in the page can't be swapped back without it.
+            if (parts.length === 1 && parts[0] === currentChapterId && currentSectionId) {
+                window.location.reload();
+                return;
+            }
             if (parts.length >= 2 && parts[0] === currentChapterId) {
                 const sectionId = parts[1];
                 const subsectionId = parts[2] || null;
