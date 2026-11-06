@@ -1,9 +1,10 @@
 """
-Chapter configuration loader for ARENA 3.0 curriculum.
+Chapter configuration loader for ARENA curriculum.
 Reads chapter metadata from config.yaml - locally if available, otherwise from GitHub.
 """
 
 import logging
+import os
 import time
 from pathlib import Path
 
@@ -19,9 +20,15 @@ CONFIG_URL = (
     "https://raw.githubusercontent.com/ARENA-education/ARENA_materials/main/infrastructure/core/config.yaml"
 )
 
-# Local config path (for development) - relative to this file's location
-# Assumes repo structure: arena-app/ is sibling to ARENA_materials/
+# Local config path (for development). ARENA_MATERIALS_DIR (if set) points at an
+# ARENA_materials checkout anywhere on disk and wins; otherwise this assumes the
+# repo structure arena-app/ is sibling to ARENA_materials/
 LOCAL_CONFIG_PATHS = [
+    *(
+        [Path(os.environ["ARENA_MATERIALS_DIR"]).expanduser() / "infrastructure" / "core" / "config.yaml"]
+        if os.environ.get("ARENA_MATERIALS_DIR")
+        else []
+    ),
     Path(__file__).parent.parent.parent.parent / "ARENA_materials" / "infrastructure" / "core" / "config.yaml",
     Path(__file__).parent.parent.parent / "ARENA_materials" / "infrastructure" / "core" / "config.yaml",
 ]

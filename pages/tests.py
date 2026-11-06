@@ -1,4 +1,6 @@
 import json
+import tempfile
+from pathlib import Path
 from unittest import mock
 
 from django.http import Http404
@@ -329,3 +331,28 @@ class PrPreviewTests(SimpleTestCase):
         self.assertIn(f"{COLAB}/main/{RAYS_NOTEBOOK}?t=20260901", html)
         for marker in ("preview-banner", "js/diff.js", "ARENA_BASE_PATH =", "noindex"):
             self.assertNotIn(marker, html)
+
+
+class SplitSectionRedirectTests(SimpleTestCase):
+    def test_old_subsection_urls_go_to_the_child_section(self):
+        response = self.client.get("/chapter0_fundamentals/05_vaes_gans/2-gans/")
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response["Location"], "/chapter0_fundamentals/52_gans/1-gans/")
+
+    def test_unknown_subsection_goes_to_the_group_landing_page(self):
+        response = self.client.get("/chapter0_fundamentals/05_vaes_gans/intro/")
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response["Location"], "/chapter0_fundamentals/05_vaes_gans/")
+
+
+class LocalArenaReadTests(SimpleTestCase):
+    def test_reads_from_a_local_checkout_but_not_outside_it(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "materials"
+            (root / "ch0").mkdir(parents=True)
+            (root / "ch0" / "page.md").write_text("# Local page", encoding="utf-8")
+            (Path(tmp) / "secret.txt").write_text("secret", encoding="utf-8")
+            with mock.patch.object(views, "LOCAL_ARENA_PATHS", [root]):
+                self.assertEqual(views._try_read_local_arena("ch0/page.md"), "# Local page")
+                self.assertIsNone(views._try_read_local_arena("../secret.txt"))
+                self.assertIsNone(views._try_read_local_arena("ch0"))
