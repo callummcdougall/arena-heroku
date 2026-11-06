@@ -8,7 +8,7 @@ There are 3 main ways to access the course:
 
 1. **Colab**. Each day of exercises has 2 Colab notebooks (linked at the top of the exercise page on this website). The "exercise Colab" leaves functions blank for you to fill in, and the "solution Colab" exists as a reference. This option doesn't rely on this website at all - the content is self-contained in the notebooks. *Recommended if you want to avoid environment setup.*
 
-2. **VS Code (blank files)**. Clone the [ARENA repo](https://github.com/ARENA-education/ARENA_materials) and create a blank Python file in the exercise directory (e.g. `chapter0_fundamentals/exercises/part1_raytracing/answers.py`). Read through exercises on this website, copying code blocks and filling in solutions. Run chunks of code using `# %%` cell delimiters or VS Code's "Execute Selection" (`Shift+Enter`). *Strongly recommended for in-person ARENA participants.*
+2. **VS Code (blank files)**. Clone the [ARENA repo](https://github.com/ARENA-education/ARENA_materials) and create a blank Python file in the exercise directory (e.g. `chapter0_fundamentals/exercises/part1_ray_tracing/answers.py`). Read through exercises on this website, copying code blocks and filling in solutions. Run chunks of code using `# %%` cell delimiters or VS Code's "Execute Selection" (`Shift+Enter`). *Strongly recommended for in-person ARENA participants.*
 
 3. **VS Code (notebooks)**. Same as Colab, but working from the `.ipynb` files in the cloned repo. **Make a copy of the exercises notebook** before starting - otherwise pulling updates will overwrite your work.
 
@@ -20,7 +20,7 @@ There are 3 main ways to access the course:
 .
 ├── chapter0_fundamentals
 │   ├── exercises
-│   │   ├── part1_raytracing
+│   │   ├── part1_ray_tracing
 │   │   │   ├── 0.1_Ray_Tracing_exercises.ipynb
 │   │   │   ├── 0.1_Ray_Tracing_solutions.ipynb
 │   │   │   ├── solutions.py
@@ -32,6 +32,7 @@ There are 3 main ways to access the course:
 ├── chapter1_transformer_interp
 ├── chapter2_rl
 ├── chapter3_llm_evals
+├── chapter4_alignment_science
 └── requirements.txt
 ```
 
@@ -60,7 +61,7 @@ Solutions appear in dropdowns below exercises. **Use hints liberally** - they're
 
 ### System requirements
 
-- **GPU**: 8GB+ VRAM (12GB+ ideal). We recommend **RTX 3060** or **RTX A4000** - see pricing on [VastAI](https://vast.ai/pricing). For heavier-duty exercises (e.g. sections 4.X of the alignment science chapter) you might need an A100, but the rest of the content here assumes you're using RTX 3000-series or A4000/A5000.
+- **GPU**: 8GB+ VRAM (12GB+ ideal). We recommend **RTX 3060** or **RTX A4000** - see pricing on [VastAI](https://vast.ai/pricing). Some sections need more memory: for example [1.3.1] Linear Probes uses Llama-2-13B (an A100 is recommended), [2.4.1] RLHF expects at least 24GB, and some sections of the alignment science chapter need an A100. Most other sections run on an RTX 3000-series or A4000/A5000.
 - **RAM**: 16GB is plenty (rule of thumb: 2x VRAM).
 - **Storage**: 50GB should suffice.
 - **Bandwidth**: 100Mbps+ recommended for downloading models/datasets.
@@ -206,7 +207,7 @@ Host arena
     User ubuntu
 ```
 
-Next, open the command palette again and search for "Connect to Host...". When you select this, the host `arena` should appear as one of the hosts - choose this option. A new VS Code window will open up. If you're asked if you want to install the recommended extensions for Python, click yes. If you're asked to choose an OS (Windows, Mac or Linux), choose Linux. When this is done, click on the file explorer icon in the top-left, and open the default directory (this will probably be `ubuntu` or `root`, on which provider you're using).
+Next, open the command palette again and search for "Connect to Host...". When you select this, the host `arena` should appear as one of the hosts - choose this option. A new VS Code window will open up. If you're asked if you want to install the recommended extensions for Python, click yes. If you're asked to choose an OS (Windows, Mac or Linux), choose Linux. When this is done, click on the file explorer icon in the top-left, and open the default directory (this will probably be `ubuntu` or `root`, depending on which provider you're using).
 
 And there you go - you're all set!
 
@@ -258,9 +259,7 @@ Move your downloaded SSH key into this folder. Then, set permissions on the SSH 
 
 #### Launch your instance
 
-Go back to the RunPod website, and navigate to "Community Cloud". You'll see several options, including (hopefully) A100s.
-
-You'll see several options, some of them might be greyed out if unavailable. Pick an A100 if possible; otherwise an A10 will also do for most exercises in this course.
+Go back to the RunPod website, and navigate to "Community Cloud". You'll see several options, some of them might be greyed out if unavailable. Pick an A100 if possible; otherwise an A10 will also do for most exercises in this course.
 
 Click "Deploy" on your chosen machine. A new options menu will open. Do the following:
 
@@ -298,7 +297,7 @@ Host arena
     Port 13212
 ```
 
-Next, open the command palette again and search for "Connect to Host...". When you select this, the host `arena` should appear as one of the hosts - choose this option. A new VS Code window will open up. If you're asked if you want to install the recommended extensions for Python, click yes. If you're asked to choose an OS (Windows, Mac or Linux), choose Linux. When this is done, click on the file explorer icon in the top-left, and open the default directory (this will probably be `ubuntu` or `root`, on which provider you're using).
+Next, open the command palette again and search for "Connect to Host...". When you select this, the host `arena` should appear as one of the hosts - choose this option. A new VS Code window will open up. If you're asked if you want to install the recommended extensions for Python, click yes. If you're asked to choose an OS (Windows, Mac or Linux), choose Linux. When this is done, click on the file explorer icon in the top-left, and open the default directory (this will probably be `ubuntu` or `root`, depending on which provider you're using).
 
 And there you go - you're all set!
 
@@ -354,14 +353,14 @@ Navigate in the sidebar to "Account", and copy your ssh key into the "Change SSH
 
 <img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/vastai_img/keys.png" width="600">
 
-Navigate in the sidebar to "Search". You'll see several options avaliable to rent,
+Navigate in the sidebar to "Search". You'll see several options available to rent,
 and sliders to filter by GPU type, RAM, HDD space, etc.
 
 Filter by
 
 * at least 50GB of disk space
 * at least 100Mbps of bandwidth
-* One of the GPUs in the above table (RTX 3000-series, A4000, A5000, V10).
+* One of the GPUs in the above table (RTX 3000-series, A4000, A5000, V100).
 
 Click "Rent" to spin up your machine.
 
@@ -395,7 +394,7 @@ Host arena
     Port 41212
 ```
 
-Next, open the command palette again and search for "Connect to Host...". When you select this, the host `arena` should appear as one of the hosts - choose this option. A new VS Code window will open up. If you're asked if you want to install the recommended extensions for Python, click yes. If you're asked to choose an OS (Windows, Mac or Linux), choose Linux. When this is done, click on the file explorer icon in the top-left, and open the default directory (this will probably be `ubuntu` or `root`, on which provider you're using).
+Next, open the command palette again and search for "Connect to Host...". When you select this, the host `arena` should appear as one of the hosts - choose this option. A new VS Code window will open up. If you're asked if you want to install the recommended extensions for Python, click yes. If you're asked to choose an OS (Windows, Mac or Linux), choose Linux. When this is done, click on the file explorer icon in the top-left, and open the default directory (this will probably be `ubuntu` or `root`, depending on which provider you're using).
 
 And there you go - you're all set!
 
@@ -408,7 +407,7 @@ After connecting to your VM, open the VS Code terminal (`Ctrl+Backtick` / `Cmd+B
 
 ```bash
 git clone https://github.com/ARENA-education/ARENA_materials.git
-ARENA_materials/install.sh
+bash ARENA_materials/install.sh
 ```
 
 Install the **Python** and **Jupyter** extensions (and optionally **Ruff** for autoformatting).

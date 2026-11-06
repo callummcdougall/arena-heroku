@@ -80,12 +80,32 @@ def fetch_github_text(url: str, extra_headers: dict[str, str] | None = None) -> 
 
         return resp.text
 
+    except requests.HTTPError as exc:
+        status = exc.response.status_code if exc.response is not None else None
+        if status in (404, 410):
+            # The file is gone (e.g. a closed PR's preview was removed): drop it
+            # rather than serving the old copy until the process restarts.
+            with _lock:
+                _cache.pop(url, None)
+            raise
+        return _serve_stale(url, entry, now)
     except requests.RequestException:
-        # 4. Network error — serve stale if available
-        if entry:
-            logger.warning("Network error fetching %s — serving stale cache", url)
-            return entry.content
-        raise
+        return _serve_stale(url, entry, now)
+
+
+def _serve_stale(url: str, entry: CacheEntry | None, now: float) -> str:
+    """
+    4. Network error, rate limit or 5xx: serve stale if available (re-raising the
+    current exception otherwise). The entry counts as validated now, so while
+    GitHub is down each URL is retried once per grace period instead of every
+    request waiting for the timeout.
+    """
+    if entry is None:
+        raise  # noqa: PLE0704 - called only from an except block
+    logger.warning("Error fetching %s — serving stale cache", url)
+    with _lock:
+        entry.last_validated = now
+    return entry.content
 
 
 def invalidate_cache(url: str | None = None) -> None:

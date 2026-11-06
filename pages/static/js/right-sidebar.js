@@ -306,7 +306,10 @@
         // Parse chapter data
         try {
             currentChapter = JSON.parse(chapterData.textContent);
-            const path = window.location.pathname;
+            // Strip the PR-preview prefix (/pr-preview/pr-<N>), as chapter-nav.js does
+            const basePath = window.ARENA_BASE_PATH || '';
+            let path = window.location.pathname;
+            if (basePath && path.startsWith(basePath)) path = path.slice(basePath.length);
             const parts = path.split('/').filter(p => p);
 
             if (parts.length >= 2) {
